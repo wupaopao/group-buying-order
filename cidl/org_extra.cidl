@@ -1,0 +1,458 @@
+
+# ####################团购任务
+struct AskTaskSpecificationLabelItem {
+	
+	# 标签Id
+	LabelId string [ binding:"required" ]
+	
+	# 标签名称
+	Name    string [ binding:"required" ]
+}
+
+struct AskTaskSpecificationItem {
+	
+	# 规格项名称
+	Name   string                               [ binding:"required"                    ]
+	
+	# 标签
+	Labels array<AskTaskSpecificationLabelItem> [ binding:"required,gt=0,dive,required" ]
+}
+
+struct AskTaskSkuItem {
+	
+	# SKU ID
+	SkuId               string        [ binding:"required"       ]
+	
+	# 标签ID
+	LabelIds            array<string> [ binding:"required,gt=0"  ]
+	
+	# 市场价
+	MarketPrice         float64       [ binding:"required,gte=0" ]
+	
+	# 团购价
+	GroupBuyingPrice    float64       [ binding:"required,gte=0" ]
+	
+	# 结算价
+	SettlementPrice     float64       [ binding:"required,gte=0" ]
+	
+	# 成本价
+	CostPrice           float64       [ binding:"required,gte=0" ]
+	
+	# 配图
+	IllustrationPicture string       
+	
+	# 库存数目
+	InventoryCount      uint32        [ binding:"required,gt=0"  ]
+	
+	# 是否显示
+	IsShow              bool         
+}
+
+
+# 组合Item Sku子项
+struct AskTaskCombinationItemSubSkuItem {
+	
+	# 规格ID
+	SkuId string [ binding:"required" ]
+	
+	# 数目
+	Count uint32 [ binding:"required" ]
+}
+
+
+# 组合Item
+struct AskTaskCombinationItem {
+	
+	# 组合名称
+	Name                string                                  [ binding:"required"                    ]
+	
+	# SKU项
+	SubSkuItems         array<AskTaskCombinationItemSubSkuItem> [ binding:"required,gt=0,dive,required" ]
+	
+	# 市场价
+	MarketPrice         float64                                 [ binding:"required,gte=0"              ]
+	
+	# 团购价
+	GroupBuyingPrice    float64                                 [ binding:"required,gte=0"              ]
+	
+	# 结算价
+	SettlementPrice     float64                                 [ binding:"required,gte=0"              ]
+	
+	# 成本价
+	CostPrice           float64                                 [ binding:"required,gte=0"              ]
+	
+	# 配图
+	IllustrationPicture string                                 
+	
+	# 是否显示
+	IsShow              bool                                   
+}
+
+
+# 团购任务图片上传TOKEN获取
+struct AckPicToken {
+	
+	# 图片文件原名
+	OriginalFileName string
+	
+	# 图片上传TOKEN
+	Token            string
+	
+	# 图片上传KEY
+	Key              string
+	
+	# 图片资源存放位置
+	StoreUrl         string
+	
+	# 图片上传访问链接
+	AccessUrl        string
+}
+
+
+# 图片token
+POST "/group_buying_order/org/task/pic_token/:organization_id" {
+	
+	Name "OrgTaskPicTokenByOrganizationID"
+	Type "json"
+	Ask {
+		FileNames array<string>
+	}
+	Ack {
+		Tokens array<AckPicToken>
+	}
+	Params {
+		OrganizationID uint32 [ form:"organization_id" binding:"required,gt=0" ]
+	}
+}
+
+
+
+# 添加团购任务
+POST "/group_buying_order/org/task/add/:organization_id" {
+	
+	Name "OrgTaskAddByOrganizationID"
+	Type "json"
+	Ask {
+		
+		# 第一步
+		# 开始显示时间
+		ShowStartTime        datetime                        [ binding:"required"                    ]
+		
+		# 开始时间时间戳
+		StartTime            datetime                       
+		
+		# 结束时间时间戳
+		EndTime              datetime                        [ binding:"required"                    ]
+		
+		# 销售类型 1:普通; 2:秒杀
+		SellType             GroupBuyingOrderTaskSellType    [ binding:"required"                    ]
+		
+		# 备注
+		Notes                string                          [ binding:"required,lte=1000"           ]
+		
+		# 是否上架
+		ShowState            GroupBuyingTaskShowState       
+		
+		# 第二步
+		# 商品名称
+		Title                string                          [ binding:"required,lte=64"             ]
+		
+		# 商品简介
+		Introduction         string                          [ binding:"required,lte=255"            ]
+		
+		# 商品封面
+		CoverPicture         string                          [ binding:"required,lte=255"            ]
+		
+		# 更多配图
+		IllustrationPictures TaskIllustrationPicturesType    [ binding:"required"                    ]
+		
+		# 产品信息
+		Info                 TaskInfoType                    [ binding:"required"                    ]
+		
+		# 规格
+		Specification        array<AskTaskSpecificationItem> [ binding:"required,gt=0,dive,required" ]
+		
+		# sku
+		Sku                  array<AskTaskSkuItem>           [ binding:"required,gt=0,dive,required" ]
+		
+		# 组合
+		Combination          array<AskTaskCombinationItem>   [ binding:"required,dive,required"      ]
+		
+		# 第三步
+		# 微信销售文案
+		WxSellText           string                          [ binding:"required"                    ]
+	}
+	Params {
+		OrganizationID uint32 [ form:"organization_id" binding:"required,gt=0" ]
+	}
+}
+
+
+
+# 编辑团购任务
+POST "/group_buying_order/org/task/edit/:organization_id/:task_id" {
+	
+	Name "OrgTaskEditByOrganizationIDByTaskID"
+	Type "json"
+	Ask {
+		
+		# 第一步
+		# 开始显示时间
+		ShowStartTime        datetime                        [ binding:"required"                    ]
+		
+		# 开始时间时间戳
+		StartTime            datetime                       
+		
+		# 结束时间时间戳
+		EndTime              datetime                        [ binding:"required"                    ]
+		
+		# 销售类型 1:普通; 2:秒杀
+		SellType             GroupBuyingOrderTaskSellType    [ binding:"required"                    ]
+		
+		# 备注
+		Notes                string                          [ binding:"required,lte=1000"           ]
+		
+		# 是否上架
+		ShowState            GroupBuyingTaskShowState       
+		
+		# 第二步
+		# 商品名称
+		Title                string                          [ binding:"required,lte=64"             ]
+		
+		# 商品简介
+		Introduction         string                          [ binding:"required,lte=255"            ]
+		
+		# 商品封面
+		CoverPicture         string                          [ binding:"required,lte=255"            ]
+		
+		# 更多配图
+		IllustrationPictures TaskIllustrationPicturesType    [ binding:"required"                    ]
+		
+		# 产品信息
+		Info                 TaskInfoType                    [ binding:"required"                    ]
+		
+		# 规格
+		Specification        array<AskTaskSpecificationItem> [ binding:"required,gt=0,dive,required" ]
+		
+		# sku
+		Sku                  array<AskTaskSkuItem>           [ binding:"required,gt=0,dive,required" ]
+		
+		# 组合
+		Combination          array<AskTaskCombinationItem>   [ binding:"required,dive,required"      ]
+		
+		# 第三步
+		# 微信销售文案
+		WxSellText           string                          [ binding:"required"                    ]
+	}
+	Params {
+		OrganizationID uint32 [ form:"organization_id" binding:"required,gt=0" ]
+		TaskID         uint32 [ form:"task_id"         binding:"required,gt=0" ]
+	}
+}
+
+
+
+# 获取团购任务
+GET "/group_buying_order/org/task/info/:task_id" {
+	
+	Name "OrgTaskInfoByTaskID"
+	Type "json"
+	Ack GroupBuyingOrderTask
+	Params {
+		TaskID uint32 [ form:"task_id" binding:"required,gt=0" ]
+	}
+}
+
+
+
+# 上架
+POST "/group_buying_order/org/task/show/:organization_id/:task_id" {
+	
+	Name "OrgTaskShowByOrganizationIDByTaskID"
+	Type "json"
+	Params {
+		OrganizationID uint32 [ form:"organization_id" binding:"required,gt=0" ]
+		TaskID         uint32 [ form:"task_id"         binding:"required,gt=0" ]
+	}
+}
+
+
+
+# 下架
+POST "/group_buying_order/org/task/hide/:organization_id/:task_id" {
+	
+	Name "OrgTaskHideByOrganizationIDByTaskID"
+	Type "json"
+	Params {
+		OrganizationID uint32 [ form:"organization_id" binding:"required,gt=0" ]
+		TaskID         uint32 [ form:"task_id"         binding:"required,gt=0" ]
+	}
+}
+
+
+
+# 删除团购任务
+POST "/group_buying_order/org/task/delete/:organization_id/:task_id" {
+	
+	Name "OrgTaskDeleteByOrganizationIDByTaskID"
+	Type "json"
+	Params {
+		OrganizationID uint32 [ form:"organization_id" binding:"required,gt=0" ]
+		TaskID         uint32 [ form:"task_id"         binding:"required,gt=0" ]
+	}
+}
+
+
+
+# 获取结团确认信息
+GET "/group_buying_order/org/task/finish_buying_confirm_count/:organization_id/:task_id" {
+	
+	Name "OrgTaskFinishBuyingConfirmCountByOrganizationIDByTaskID"
+	Type "json"
+	Ack {
+		
+		# 总社群数目
+		TotalGroupCount  uint32
+		
+		# 已购买社群数目
+		BuyGroupCount    uint32
+		
+		# 未购买社群数目
+		NotBuyGroupCount uint32
+	}
+	Params {
+		OrganizationID uint32 [ form:"organization_id" binding:"required,gt=0" ]
+		TaskID         uint32 [ form:"task_id"         binding:"required,gt=0" ]
+	}
+}
+
+
+
+# 已结团并且已经销售出去的团购任务列表
+GET "/group_buying_order/org/task/sold_list/:organization_id" {
+	
+	Name "OrgTaskSoldListByOrganizationID"
+	Type "json"
+	Ack {
+		
+		# 总记录数
+		Count uint32                     
+		
+		# 任务列表
+		List  array<GroupBuyingOrderTask>
+	}
+	Params {
+		OrganizationID uint32 [ form:"organization_id" binding:"required,gt=0" ]
+	}
+	Query {
+		
+		# 页码
+		Page     uint32 [ form:"page"      binding:"required,gt=0"       ]
+		
+		# 分页大小
+		PageSize uint32 [ form:"page_size" binding:"required,gt=0,lt=50" ]
+		
+		# 搜索
+		Search   string [ form:"search"    ]
+	}
+}
+
+
+
+# 社群团购信息列表
+GET "/group_buying_order/org/task/finish_buying_group_list/:organization_id/:task_id" {
+	
+	Name "OrgTaskFinishBuyingGroupListByOrganizationIDByTaskID"
+	Type "json"
+	Ack {
+		
+		# 分页数目总数
+		Count uint32                             
+		
+		# 社区团购列表
+		List  array<GroupBuyingOrderCommunityBuy>
+	}
+	Params {
+		
+		# 组织ID
+		OrganizationID uint32 [ form:"organization_id" binding:"required,gt=0" ]
+		
+		# 团购任务ID
+		TaskID         uint32 [ form:"task_id"         binding:"required,gt=0" ]
+	}
+	Query {
+		
+		# 页码
+		Page     uint32 [ form:"page"      binding:"required,gt=0"       ]
+		
+		# 分页大小
+		PageSize uint32 [ form:"page_size" binding:"required,gt=0,lt=50" ]
+	}
+}
+
+
+
+# 确定结团
+POST "/group_buying_order/org/task/finish_buying/:organization_id/:task_id" {
+	
+	Name "OrgTaskFinishBuyingByOrganizationIDByTaskID"
+	Type "json"
+	Params {
+		
+		# 团购组织ID
+		OrganizationID uint32 [ form:"organization_id" binding:"required,gt=0" ]
+		
+		# 团购任务ID
+		TaskID         uint32 [ form:"task_id"         binding:"required,gt=0" ]
+	}
+}
+
+
+
+# ####################订货单
+# 添加订货单团购任务
+POST "/group_buying_order/org/indent/add/:organization_id" {
+	
+	Name "OrgIndentAddByOrganizationID"
+	Type "json"
+	Ask {
+		
+		# 团购任务ID
+		TaskIds array<uint32> [ binding:"required,gt=0" ]
+	}
+	Ack {
+		
+		# 订货单ID
+		IndentId string
+	}
+	Params {
+		
+		# 组织ID
+		OrganizationID uint32 [ form:"organization_id" binding:"required,gt=0" ]
+	}
+}
+
+
+
+# ####################配送单
+# 绑定配送单团购任务
+POST "/group_buying_order/org/send/add/:organization_id" {
+	
+	Name "OrgSendAddByOrganizationID"
+	Type "json"
+	Ask {
+		
+		# 团购任务ID
+		TaskIds array<uint32> [ binding:"required,gt=0" ]
+	}
+	Ack {
+		
+		# 配送单ID
+		SendId string
+	}
+	Params {
+		OrganizationID uint32 [ form:"organization_id" binding:"required,gt=0" ]
+	}
+}
+
+

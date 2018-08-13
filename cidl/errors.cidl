@@ -1,0 +1,12 @@
+errors {
+	ErrTaskNotInProgress                         9000 "团购任务团购状态不在进行中"           
+	ErrTaskGroupStateIsNotInNotStart             9001 "团购任务团购状态不在未开始状态"     
+	ErrTaskGroupStateIsNotInNotStartOrInProgress 9002 "团购任务不在进行中或者未开始状态"  
+	ErrTaskAddEditIllegalTime                    9003 "团购开始时间或结束时间不正确"        
+	ErrTaskGoodsNotExists                        9004 "所选团购任务商品不存在"                 
+	ErrInventoryShortage                         9005 "商品库存不足"                                
+	ErrTaskGoodsUnavailableForSale               9006 "商品不允许被购买"                          
+	ErrTaskAddOrderFailed                        9007 "订单添加失败"                                
+	ErrSendCommunityNotBindLine                  9010 "存在社群未绑定配送路线"                 
+}
+

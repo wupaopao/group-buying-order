@@ -1,0 +1,247 @@
+
+# 团购任务默认列表
+GET "/group_buying_order/org/task/list/:organization_id" {
+	
+	Name "OrgTaskList"
+	Type "json"
+	Ack {
+		
+		# 总记录数
+		Count uint32                     
+		
+		# 任务列表
+		List  array<GroupBuyingOrderTask>
+	}
+	Params {
+		OrganizationID uint32 [ form:"organization_id" binding:"required,gt=0" ]
+	}
+	Query {
+		
+		# 页码
+		Page     uint32 [ form:"page"      binding:"required,gt=0"       ]
+		
+		# 分页大小
+		PageSize uint32 [ form:"page_size" binding:"required,gt=0,lt=50" ]
+	}
+}
+
+
+
+# 团购任务月份列表
+GET "/group_buying_order/org/task/month_list/:organization_id" {
+	
+	Name "OrgTaskMonthListByYearByMonth"
+	Type "json"
+	Ack {
+		
+		# 总记录数
+		Count uint32                     
+		
+		# 任务列表
+		List  array<GroupBuyingOrderTask>
+	}
+	Params {
+		OrganizationID uint32 [ form:"organization_id" binding:"required,gt=0" ]
+	}
+	Query {
+		
+		# 年份
+		Year     uint32 [ form:"year"      binding:"required,gt=0"        ]
+		
+		# 月份
+		Month    uint32 [ form:"month"     binding:"required,gt=0,lte=12" ]
+		
+		# 页码
+		Page     uint32 [ form:"page"      binding:"required,gt=0"        ]
+		
+		# 分页大小
+		PageSize uint32 [ form:"page_size" binding:"required,gt=0,lt=50"  ]
+	}
+}
+
+
+
+# 已结团团购任务列表
+GET "/group_buying_order/org/task/finish_buying_list/:organization_id" {
+	
+	Name "OrgTaskFinishBuyingListByOrganizationID"
+	Type "json"
+	Ack {
+		
+		# 总记录数
+		Count uint32                     
+		
+		# 任务列表
+		List  array<GroupBuyingOrderTask>
+	}
+	Params {
+		OrganizationID uint32 [ form:"organization_id" binding:"required,gt=0" ]
+	}
+	Query {
+		
+		# 页码
+		Page     uint32 [ form:"page"      binding:"required,gt=0"       ]
+		
+		# 分页大小
+		PageSize uint32 [ form:"page_size" binding:"required,gt=0,lt=50" ]
+		
+		# 搜索
+		Search   string [ form:"search"    ]
+	}
+}
+
+
+
+# 订货单列表
+GET "/group_buying_order/org/indent/list/:organization_id" {
+	
+	Name "OrgIndentListByOrganizationID"
+	Type "json"
+	Ack {
+		
+		# 总记录数
+		Count uint32                  
+		
+		# 任务列表
+		List  array<GroupBuyingIndent>
+	}
+	Params {
+		OrganizationID uint32 [ form:"organization_id" binding:"required,gt=0" ]
+	}
+	Query {
+		
+		# 页码
+		Page     uint32 [ form:"page"      binding:"required,gt=0"       ]
+		
+		# 分页大小
+		PageSize uint32 [ form:"page_size" binding:"required,gt=0,lt=50" ]
+	}
+}
+
+
+
+# 订货单概要
+GET "/group_buying_order/org/indent/summary/:indent_id" {
+	
+	Name "OrgIndentSummaryListByIndentID"
+	Type "json"
+	Ack {
+		TaskStatistics array<GroupBuyingIndentStatisticResultItem>
+	}
+	Params {
+		IndentID string [ form:"indent_id" binding:"required" ]
+	}
+}
+
+
+
+# 导出订货单
+GET "/group_buying_order/org/indent/invoices/:indent_id" {
+	
+	Name "OrgIndentInvoicesByIndentID"
+	Type "json"
+	Params {
+		
+		# 订货单ID
+		IndentID string [ form:"indent_id" binding:"required" ]
+	}
+}
+
+
+
+# 配送单列表
+GET "/group_buying_order/org/send/list/:organization_id" {
+	
+	Name "OrgSendListByOrganizationID"
+	Type "json"
+	Ack {
+		
+		# 总记录数
+		Count uint32                
+		
+		# 任务列表
+		List  array<GroupBuyingSend>
+	}
+	Params {
+		OrganizationID uint32 [ form:"organization_id" binding:"required,gt=0" ]
+	}
+	Query {
+		
+		# 页码
+		Page     uint32 [ form:"page"      binding:"required,gt=0"       ]
+		
+		# 分页大小
+		PageSize uint32 [ form:"page_size" binding:"required,gt=0,lt=50" ]
+	}
+}
+
+
+
+# 导出配送单
+GET "/group_buying_order/org/send/invoices/:send_id" {
+	
+	Name "OrgSendInvoicesBySendID"
+	Type "json"
+	Params {
+		SendID string [ form:"send_id" binding:"required" ]
+	}
+}
+
+
+
+# 配送路线列表
+GET "/group_buying_order/org/line/list/:organization_id" {
+	
+	Name "OrgLineListByOrganizationID"
+	Type "json"
+	Ack {
+		
+		# 数目
+		Count uint32                
+		
+		# 列表
+		List  array<GroupBuyingLine>
+	}
+	Params {
+		OrganizationID uint32 [ form:"organization_id" binding:"required,gt=0" ]
+	}
+	Query {
+		
+		# 页码
+		Page     uint32 [ form:"page"      binding:"required,gt=0"       ]
+		
+		# 分页大小
+		PageSize uint32 [ form:"page_size" binding:"required,gt=0,lt=50" ]
+	}
+}
+
+
+
+# 配送路线社群列表
+GET "/group_buying_order/org/line_community/list/:organization_id/:line_id" {
+	
+	Name "OrgLineCommunityListByOrganizationID"
+	Type "json"
+	Ack {
+		
+		# 数目
+		Count uint32                         
+		
+		# 列表
+		List  array<GroupBuyingLineCommunity>
+	}
+	Params {
+		OrganizationID uint32 [ form:"organization_id" binding:"required,gt=0" ]
+		LineID         uint32 [ form:"line_id"         binding:"required,gt=0" ]
+	}
+	Query {
+		
+		# 页码
+		Page     uint32 [ form:"page"      binding:"required,gt=0"       ]
+		
+		# 分页大小
+		PageSize uint32 [ form:"page_size" binding:"required,gt=0,lt=50" ]
+	}
+}
+
+

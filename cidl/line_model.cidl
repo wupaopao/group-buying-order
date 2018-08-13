@@ -1,0 +1,55 @@
+
+# 送货路线
+struct GroupBuyingLine {
+	
+	# 线路id
+	LineId           uint32   [ db:"lin_id"          ]
+	
+	# 团购组织id
+	OrganizationId   uint32   [ db:"org_id"          ]
+	
+	# 团购组织名称
+	OrganizationName string   [ db:"org_name"        ]
+	
+	# 线路名称
+	Name             string   [ db:"name"            ]
+	
+	# 绑定的社群数目
+	CommunityCount   uint32   [ db:"community_count" ]
+	
+	# 创建时间
+	CreateTime       datetime [ db:"create_time"     ]
+}
+
+
+# 路线绑定社群
+struct GroupBuyingLineCommunity {
+	
+	# 社群id
+	GroupId        uint32   [ db:"grp_id"         ]
+	
+	# 线路id
+	LineId         uint32   [ db:"lin_id"         ]
+	
+	# 线路名称
+	LineName       string   [ db:"lin_name"       ]
+	
+	# 社群名称
+	GroupName      string   [ db:"grp_name"       ]
+	
+	# 管理员用户ID
+	ManagerUid     string   [ db:"manager_uid"    ]
+	
+	# 管理员名称
+	ManagerName    string   [ db:"manager_name"   ]
+	
+	# 管理员手机
+	ManagerMobile  string   [ db:"manager_mobile" ]
+	
+	# 组织ID
+	OrganizationId uint32   [ db:"org_id"         ]
+	
+	# 创建时间
+	CreateTime     datetime [ db:"create_time"    ]
+}
+

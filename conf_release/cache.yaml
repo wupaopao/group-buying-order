@@ -1,0 +1,5 @@
+auth:
+    endpoint: "10.0.0.11:6379"
+    db: 9
+    size: 50
+    password: "crs-4ifwilta:First2012!!"

@@ -1,0 +1,94 @@
+###127.0.0.1:9004/api/v1/group_buying/org/task/add/1
+
+POST BODY提交参数结构
+
+```json
+{
+	"StartTime":"2017-11-21 14:42:50",//开始时间
+	"EndTime": "2017-11-21 14:42:50",//结束时间
+	"Notes":"周一截单，8折优惠",//备注
+	"IsAutoPost":true,//是否是自动发布
+	"Title":"鸡蛋",//标题
+	"Introduction":"上好鸡蛋",//简介
+	"CoverPicture":"http://xxx.jpg",//封面图
+	"IllustrationPictures":[//配图
+		"http://xxxx.jpg",
+		"http://xxx2.jpg"
+	],
+	"Info":[//产品信息
+		{
+			"Title":"产地",//标题
+			"Content":"广东"//内容
+		},
+		{
+			"Title":"保质期",
+			"Content":"16个月"
+		}
+	],
+	"Specification":[//规格
+		{
+			"Name":"颜色",//规格分类名
+			"Labels":[//标签
+				{//标签ID：标签项
+					"LabelId":"1:1",//标签ID
+					"Name":"黑色"//名称
+				},
+				{
+					"LabelId":"1:2",
+					"Name":"白色"
+				}
+			]
+		},
+		{
+			"Name":"尺寸",
+			"Labels":[
+				{
+					"LabelId":"2:1",
+					"Name":"L"
+				},
+				{
+					"LabelId":"2:2",
+					"Name":"XL"
+				}
+			]
+		}
+	],
+	
+	"Sku":[//sku表
+		{
+			"LabelIds":["1:1","2:1"],//标签ID
+			"MarketPrice":100,//市场价
+			"GroupBuyingPrice":80,//团购价
+			"SettlementPrice":70,//结算价
+			"CostPrice":60,//成本价
+			"IllustrationPicture":"http://xxxx.jpg"//配图
+		},
+		{
+			"LabelIds":["1:1","2:2"],
+			"MarketPrice":100,
+			"GroupBuyingPrice":80,
+			"SettlementPrice":70,
+			"CostPrice":60,
+			"IllustrationPicture":"http://xxxx.jpg"
+		},
+		{
+			"LabelIds":["1:2","2:1"],
+			"MarketPrice":100,
+			"GroupBuyingPrice":80,
+			"SettlementPrice":70,
+			"CostPrice":60,
+			"IllustrationPicture":"http://xxxx.jpg"
+		},
+		{
+			"LabelIds":["1:2","2:2"],
+			"MarketPrice":100,
+			"GroupBuyingPrice":80,
+			"SettlementPrice":70,
+			"CostPrice":60,
+			"IllustrationPicture":"http://xxxx.jpg"
+		}
+	],
+	"Detail":"来自广东的鸡蛋，非常好"//详情
+}
+```
+

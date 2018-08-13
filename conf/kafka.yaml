@@ -1,0 +1,29 @@
+subscribe:
+    service_community_service:
+        address: [
+            "127.0.0.13:9092"
+        ]
+        group: "group-group-buying-order-service"
+
+    service_group_buying_order_service:
+        address: [
+            "127.0.0.13:9092"
+        ]
+        group: "group-group-buying-order-service"
+
+    service_user_service:
+        address: [
+            "127.0.0.13:9092"
+        ]
+        group: "group-group-buying-order-service"
+
+    service_auth_service:
+        address: [
+            "127.0.0.13:9092"
+        ]
+        group: "group-group-buying-order-service"
+
+producer:
+    brokers: [
+        "127.0.0.13:9092"
+    ]

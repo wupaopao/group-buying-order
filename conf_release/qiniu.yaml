@@ -1,0 +1,11 @@
+public:
+  url_prefix: "http://p5mc4zzkw.bkt.clouddn.com/"
+  access_key: "z-tbS2yGPgC_H8tJYe8T5jN3u2BCagTFNZzxHyTu"
+  secret_key: "LAi8PwDngGXpQEXASKn5XfcGOfnIbj4XhWLueXnW"
+  bucket: "bilimall-public"
+
+private:
+  url_prefix: "http://p5mcdg8ov.bkt.clouddn.com/"
+  access_key: "z-tbS2yGPgC_H8tJYe8T5jN3u2BCagTFNZzxHyTu"
+  secret_key: "LAi8PwDngGXpQEXASKn5XfcGOfnIbj4XhWLueXnW"
+  bucket: "bilimall-private"

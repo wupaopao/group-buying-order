@@ -1,0 +1,13 @@
+{
+	"version": 0,
+	"dependencies": [
+		{
+			"importpath": "github.com/360EntSecGroup-Skylar/excelize",
+			"repository": "https://github.com/360EntSecGroup-Skylar/excelize",
+			"vcs": "git",
+			"revision": "12760a7ee6d0256c44da0a16a0da1c8730517ee3",
+			"branch": "master",
+			"notests": true
+		}
+	]
+}

@@ -1,0 +1,354 @@
+struct GroupBuyingOrderCombinationSubItem {
+	
+	# 元素ID
+	SkuId  string                                       
+	
+	# 标签
+	Labels map<string,GroupBuyingSpecificationItemLabel>
+	
+	# 数量
+	Count  uint32                                       
+}
+
+
+# 规格组合项
+struct GroupBuyingOrderTaskCombinationItem {
+	
+	# 组合ID
+	SkuId               string                                        
+	
+	# 组合名称
+	Name                string                                        
+	
+	# 组合的规格SkuIds
+	SubItems            map<string,GroupBuyingOrderCombinationSubItem>
+	
+	# 市场价
+	MarketPrice         float64                                       
+	
+	# 团购价
+	GroupBuyingPrice    float64                                       
+	
+	# 结算价
+	SettlementPrice     float64                                       
+	
+	# 成本价
+	CostPrice           float64                                       
+	
+	# 配图
+	IllustrationPicture string                                        
+	
+	# 是否显示
+	IsShow              bool                                          
+}
+
+
+# 商品规格组合
+struct GroupBuyingOrderTaskSpecification {
+	.GroupBuyingSpecification
+	
+	# 组合项映射
+	CombinationSkuMap map<string,GroupBuyingOrderTaskCombinationItem>
+}
+
+
+# 团购任务销售类型
+enum GroupBuyingOrderTaskSellType { 
+	
+	# 普通
+	GroupBuyingOrderTaskSellTypeDefault 1
+	
+	# 秒杀
+	GroupBuyingOrderTaskSellTypeSeckill 2
+}
+
+
+# 团购任务内容
+struct GroupBuyingOrderTaskContent {
+	
+	# 团购任务ID
+	TaskId               uint32                            [ db:"tsk_id"                ]
+	
+	# 团购组织ID
+	OrganizationId       uint32                            [ db:"org_id"                ]
+	
+	# 团购任务标题
+	Title                string                            [ db:"title"                 ]
+	
+	# 团购任务简介
+	Introduction         string                            [ db:"introduction"          ]
+	
+	# 团购任务封面图
+	CoverPicture         string                            [ db:"cover_picture"         ]
+	
+	# 团购任务配图数组
+	IllustrationPictures TaskIllustrationPicturesType      [ db:"illustration_pictures" ]
+	
+	# 产品信息
+	Info                 TaskInfoType                      [ db:"info"                  ]
+	
+	# 规格
+	Specification        GroupBuyingOrderTaskSpecification [ db:"specification"         ]
+	
+	# 微信销售文案
+	WxSellText           string                            [ db:"wx_sell_text"          ]
+	
+	# 备注
+	Notes                string                            [ db:"notes"                 ]
+	
+	# 显示时间
+	ShowStartTime        datetime                          [ db:"show_start_time"       ]
+	
+	# 开始时间
+	StartTime            datetime                          [ db:"start_time"            ]
+	
+	# 结束时间
+	EndTime              datetime                          [ db:"end_time"              ]
+	
+	# 销售类型
+	SellType             GroupBuyingOrderTaskSellType      [ db:"sell_type"             ]
+	
+	# 记录版本
+	Version              uint32                            [ db:"version"               ]
+}
+
+
+# 团长下单模式团购任务
+struct GroupBuyingOrderTask {
+	.GroupBuyingOrderTaskContent
+	
+	# 显示状态（上下架状态）
+	ShowState  GroupBuyingTaskShowState  [ db:"show_state"  ]
+	
+	# 团购状态
+	GroupState GroupBuyingTaskGroupState [ db:"group_state" ]
+	
+	# 下单状态
+	OrderState GroupBuyingTaskOrderState [ db:"order_state" ]
+	
+	# 销售量
+	Sales      uint32                    [ db:"sales"       ]
+	
+	# 是否已经删除
+	IsDelete   bool                      [ db:"is_delete"   ]
+	
+	# 创建时间
+	CreateTime datetime                  [ db:"create_time" ]
+}
+
+
+# 团长下单模式库存
+struct GroupBuyingOrderInventory {
+	
+	# 团购任务ID
+	TaskId  uint32 [ db:"tsk_id"  ]
+	
+	# SKU ID
+	SkuId   string [ db:"sku_id"  ]
+	
+	# 总数量
+	Total   uint32 [ db:"total"   ]
+	
+	# 销售量
+	Sales   uint32 [ db:"sales"   ]
+	
+	# 余量
+	Surplus uint32 [ db:"surplus" ]
+}
+
+
+# 社群订购记录表
+struct GroupBuyingOrderCommunityBuy {
+	
+	# 购买ID
+	BuyId                 string                 [ db:"cby_id"                   ]
+	
+	# 订单ID
+	OrderId               string                 [ db:"order_id"                 ]
+	
+	# 社群ID
+	GroupId               uint32                 [ db:"grp_id"                   ]
+	
+	# 社群订单ID
+	GroupOrderId          string                 [ db:"grp_ord_id"               ]
+	
+	# 社群名称
+	GroupName             string                 [ db:"grp_name"                 ]
+	
+	# 团购任务ID
+	TaskId                uint32                 [ db:"tsk_id"                   ]
+	
+	# 团购任务名称
+	TaskTitle             string                 [ db:"tsk_title"                ]
+	
+	# 社群管理员用户ID
+	ManagerUserId         string                 [ db:"manager_uid"              ]
+	
+	# 社群管理员名称
+	ManagerName           string                 [ db:"manager_name"             ]
+	
+	# 社群管理员手机
+	ManagerMobile         string                 [ db:"manager_mobile"           ]
+	
+	# SKU ID
+	SkuId                 string                 [ db:"sku_id"                   ]
+	
+	# 购买细节
+	BuyDetail             CommunityBuyDetailType [ db:"buy_detail"               ]
+	
+	# 数目
+	Count                 uint32                 [ db:"count"                    ]
+	
+	# 总市场价
+	TotalMarketPrice      float64                [ db:"total_market_price"       ]
+	
+	# 总团购价
+	TotalGroupBuyingPrice float64                [ db:"total_group_buying_price" ]
+	
+	# 总结算价
+	TotalSettlementPrice  float64                [ db:"total_settlement_price"   ]
+	
+	# 总成本价
+	TotalCostPrice        float64                [ db:"total_cost_price"         ]
+	
+	# 版本
+	Version               uint32                 [ db:"version"                  ]
+	
+	# 创建时间
+	CreateTime            datetime               [ db:"create_time"              ]
+}
+
+
+# 社群购买团购任务的订单统计
+struct GroupBuyingOrderCommunityBuyTask {
+	
+	# 团购任务ID
+	TaskId                uint32                      [ db:"tsk_id"                   ]
+	
+	# 社群ID
+	GroupId               uint32                      [ db:"grp_id"                   ]
+	
+	# 团购任务详情
+	TaskDetail            GroupBuyingOrderTaskContent [ db:"task_detail"              ]
+	
+	# 订单数量
+	OrderCount            uint32                      [ db:"order_count"              ]
+	
+	# 商品数量
+	GoodsCount            uint32                      [ db:"goods_count"              ]
+	
+	# 总市场价
+	TotalMarketPrice      float64                     [ db:"total_market_price"       ]
+	
+	# 总团购价
+	TotalGroupBuyingPrice float64                     [ db:"total_group_buying_price" ]
+	
+	# 总结算价
+	TotalSettlementPrice  float64                     [ db:"total_settlement_price"   ]
+	
+	# 总成本价
+	TotalCostPrice        float64                     [ db:"total_cost_price"         ]
+	
+	# 版本
+	Version               uint32                      [ db:"version"                  ]
+	
+	# 创建时间
+	CreateTime            datetime                    [ db:"create_time"              ]
+}
+
+
+# 订单
+struct GroupBuyingOrderCommunityOrder {
+	
+	# 订单ID
+	OrderId               string                    [ db:"ord_id"                   ]
+	
+	# 社群ID
+	GroupId               uint32                    [ db:"grp_id"                   ]
+	
+	# 社群订单ID
+	GroupOrderId          string                    [ db:"grp_ord_id"               ]
+	
+	# 商品详情
+	GoodsDetail           CommunityOrderGoodsDetail [ db:"goods_detail"             ]
+	
+	# 商品数
+	Count                 uint32                    [ db:"count"                    ]
+	
+	# 总市场价
+	TotalMarketPrice      float64                   [ db:"total_market_price"       ]
+	
+	# 总团购价
+	TotalGroupBuyingPrice float64                   [ db:"total_group_buying_price" ]
+	
+	# 总结算价
+	TotalSettlementPrice  float64                   [ db:"total_settlement_price"   ]
+	
+	# 总成本价
+	TotalCostPrice        float64                   [ db:"total_cost_price"         ]
+	
+	# 版本
+	Version               uint32                    [ db:"version"                  ]
+	
+	# 创建时间
+	CreateTime            datetime                  [ db:"create_time"              ]
+}
+
+
+# 社团购物车
+struct GroupBuyingOrderCommunityCart {
+	
+	# 购物车ID
+	CartId                string                 [ db:"ccr_id"                   ]
+	
+	# 社群ID
+	GroupId               uint32                 [ db:"grp_id"                   ]
+	
+	# 团购任务ID
+	TaskId                uint32                 [ db:"tsk_id"                   ]
+	
+	# 团购任务标题
+	TaskTitle             string                 [ db:"tsk_title"                ]
+	
+	# SKU ID
+	SkuId                 string                 [ db:"sku_id"                   ]
+	
+	# 购买细节
+	BuyDetail             CommunityBuyDetailType [ db:"buy_detail"               ]
+	
+	# 购买数目
+	Count                 uint32                 [ db:"count"                    ]
+	
+	# 总市场价
+	TotalMarketPrice      float64                [ db:"total_market_price"       ]
+	
+	# 总团购价
+	TotalGroupBuyingPrice float64                [ db:"total_group_buying_price" ]
+	
+	# 总结算价
+	TotalSettlementPrice  float64                [ db:"total_settlement_price"   ]
+	
+	# 总成本价
+	TotalCostPrice        float64                [ db:"total_cost_price"         ]
+	
+	# 版本
+	Version               uint32                 [ db:"version"                  ]
+	
+	# 创建时间
+	CreateTime            datetime               [ db:"create_time"              ]
+}
+
+
+# 社群购买记录
+struct CommunityBuyDetailType {
+	
+	# 是否是组合
+	IsCombination    bool                               
+	
+	# 单品
+	SingleGoods      GroupBuyingSkuMapItem              
+	
+	# 组合
+	CombinationGoods GroupBuyingOrderTaskCombinationItem
+}
+

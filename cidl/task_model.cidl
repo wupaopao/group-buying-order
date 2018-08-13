@@ -1,0 +1,162 @@
+
+# 产品信息
+struct GroupBuyingTaskInfo {
+	
+	# 产品信息标题
+	Title   string
+	
+	# 产品信息内容
+	Content string
+}
+
+
+# 规格项Label
+struct GroupBuyingSpecificationItemLabel {
+	
+	# 标签Id
+	LabelId string
+	
+	# 标签名称
+	Name    string
+}
+
+
+# 商品规格项
+struct GroupBuyingSpecificationItem {
+	
+	# 规格项Id
+	ItemId         string                                       
+	
+	# 规格名
+	Name           string                                       
+	
+	# 标签ID自增计数器
+	LabelIdCounter uint32                                       
+	
+	# 标签
+	Labels         map<string,GroupBuyingSpecificationItemLabel>
+}
+
+
+# SKU映射
+struct GroupBuyingSkuMapItem {
+	
+	# 元素ID
+	SkuId               string                                       
+	
+	# Sku名称
+	Name                string                                       
+	
+	# 标签
+	Labels              map<string,GroupBuyingSpecificationItemLabel>
+	
+	# 市场价
+	MarketPrice         float64                                      
+	
+	# 团购价
+	GroupBuyingPrice    float64                                      
+	
+	# 结算价
+	SettlementPrice     float64                                      
+	
+	# 成本价
+	CostPrice           float64                                      
+	
+	# 配图
+	IllustrationPicture string                                       
+	
+	# 是否显示
+	IsShow              bool                                         
+	
+	# 库存数目
+	InventoryCount      uint32                                       
+}
+
+
+# 商品规格价格区间
+struct SpecificationPriceRange {
+	
+	# 最小市场价
+	Min float64
+	
+	# 最大市场价
+	Max float64
+}
+
+
+# 商品规格
+struct GroupBuyingSpecification {
+	
+	# 规格项ID计数器
+	ItemIdCounter         uint32                                  
+	
+	# 规格项数组
+	Items                 map<string,GroupBuyingSpecificationItem>
+	
+	# SKU映射
+	SkuMap                map<string,GroupBuyingSkuMapItem>       
+	
+	# 市场价区间
+	MarketPriceRange      SpecificationPriceRange                 
+	
+	# 团购价价格区间
+	GroupBuyingPriceRange SpecificationPriceRange                 
+	
+	# 结算价价格区间
+	SettlementPriceRange  SpecificationPriceRange                 
+	
+	# 成本价价格区间
+	CostPriceRange        SpecificationPriceRange                 
+}
+
+
+# 显示状态
+enum GroupBuyingTaskShowState { 
+	
+	# 上架
+	GroupBuyingTaskShowStateShow   1
+	
+	# 下架
+	GroupBuyingTaskShowStateHidden 0
+}
+
+
+# 团购任务状态
+enum GroupBuyingTaskGroupState { 
+	
+	# 未开团
+	GroupBuyingTaskGroupStateNotStart       0
+	
+	# 进行中
+	GroupBuyingTaskGroupStateInProgress     1
+	
+	# 已截单
+	GroupBuyingTaskGroupStateFinishOrdering 2
+	
+	# 已结团
+	GroupBuyingTaskGroupStateFinishBuying   3
+	
+	# 已取消
+	GroupBuyingTaskGroupStateCancel         4
+}
+
+
+# 下单送货状态
+enum GroupBuyingTaskOrderState { 
+	
+	# 未订货
+	GroupBuyingTaskOrderStateNotOrder   0
+	
+	# 已订货
+	GroupBuyingTaskOrderStateOrdered    1
+	
+	# 未配送
+	GroupBuyingTaskOrderStateNotDeliver 2
+	
+	# 已配送
+	GroupBuyingTaskOrderStateDelivered  3
+	
+	# 已完成
+	GroupBuyingTaskOrderStateFinish     4
+}
+

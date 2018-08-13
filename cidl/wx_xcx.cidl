@@ -1,0 +1,440 @@
+
+# 团购任务列表结构参考admin.cidl和admin.md
+# 今日团购
+struct AckWxXcxTaskListItem {
+	
+	# 任务ID
+	TaskId                uint32                           
+	
+	# 组织ID
+	OrganizationID        uint32                           
+	
+	# 团购任务标题
+	Title                 string                           
+	
+	# 商品规格
+	Specification         GroupBuyingOrderTaskSpecification
+	
+	# 团购任务封面图
+	CoverPicture          string                           
+	
+	# 市场价区间
+	MarketPriceRange      SpecificationPriceRange          
+	
+	# 团购价价格区间
+	GroupBuyingPriceRange SpecificationPriceRange          
+	
+	# 结算价价格区间
+	SettlementPriceRange  SpecificationPriceRange          
+	
+	# 成本价价格区间
+	CostPriceRange        SpecificationPriceRange          
+	
+	# 开始时间
+	StartTime             datetime                         
+	
+	# 结束时间
+	EndTime               datetime                         
+	
+	# 销量
+	Sales                 uint32                           
+	
+	# 备注
+	Notes                 string                           
+	
+	# 销售类型 1:普通报单 2:秒杀
+	SellType              GroupBuyingOrderTaskSellType     
+	
+	# 团购状态
+	GroupState            GroupBuyingTaskGroupState         [ db:"group_state" ]
+	
+	# 下单状态
+	OrderState            GroupBuyingTaskOrderState         [ db:"order_state" ]
+}
+
+
+# 今日团购
+GET "/group_buying_order/wx_xcx/task/today_list/:organization_id" {
+	
+	Name "WxXcxTaskTodayListByOrganizationID"
+	Type "json"
+	Ack {
+		
+		# 总记录数
+		Count uint32                     
+		
+		# 任务列表
+		List  array<AckWxXcxTaskListItem>
+	}
+	Params {
+		OrganizationID uint32 [ form:"organization_id" binding:"required,gt=0" ]
+	}
+	Query {
+		
+		# 页码
+		Page     uint32 [ form:"page"      binding:"required,gt=0"       ]
+		
+		# 分页大小
+		PageSize uint32 [ form:"page_size" binding:"required,gt=0,lt=50" ]
+	}
+}
+
+
+
+# 未来团购
+GET "/group_buying_order/wx_xcx/task/future_list/:organization_id" {
+	
+	Name "WxXcxTaskFutureListByOrganizationID"
+	Type "json"
+	Ack {
+		
+		# 总记录数
+		Count uint32                     
+		
+		# 任务列表
+		List  array<AckWxXcxTaskListItem>
+	}
+	Params {
+		OrganizationID uint32 [ form:"organization_id" binding:"required,gt=0" ]
+	}
+	Query {
+		
+		# 页码
+		Page     uint32 [ form:"page"      binding:"required,gt=0"       ]
+		
+		# 分页大小
+		PageSize uint32 [ form:"page_size" binding:"required,gt=0,lt=50" ]
+	}
+}
+
+
+
+# 历史团购
+GET "/group_buying_order/wx_xcx/task/history_list/:organization_id" {
+	
+	Name "WxXcxTaskHistoryListByOrganizationID"
+	Type "json"
+	Ack {
+		
+		# 总记录数
+		Count uint32                     
+		
+		# 任务列表
+		List  array<AckWxXcxTaskListItem>
+	}
+	Params {
+		OrganizationID uint32 [ form:"organization_id" binding:"required,gt=0" ]
+	}
+	Query {
+		
+		# 页码
+		Page     uint32 [ form:"page"      binding:"required,gt=0"       ]
+		
+		# 分页大小
+		PageSize uint32 [ form:"page_size" binding:"required,gt=0,lt=50" ]
+	}
+}
+
+
+
+# 获取团购任务
+GET "/group_buying_order/wx_xcx/task/info/:task_id" {
+	
+	Name "WxXcxTaskInfoByTaskID"
+	Type "json"
+	Ack GroupBuyingOrderTask
+	Params {
+		TaskID uint32 [ form:"task_id" binding:"required,gt=0" ]
+	}
+}
+
+
+
+# 获取多个团购任务的微信销售文案
+POST "/group_buying_order/wx_xcx/task/batch_wx_sell_text/:organization_id" {
+	
+	Name "WxXcxTaskBatchWxSellTextByOrganizationID"
+	Type "json"
+	Ask {
+		
+		# 团购任务ID 最大长度为50
+		TaskIds array<uint32> [ binding:"required,gt=0,lte=50" ]
+	}
+	Ack {
+		
+		# 团购任务列表
+		List array<string>
+	}
+	Params {
+		
+		# 组织ID
+		OrganizationID uint32 [ form:"organization_id" binding:"required,gt=0" ]
+	}
+}
+
+
+
+# 添加到购物车
+POST "/group_buying_order/wx_xcx/cart/add_cart/:group_id/:task_id" {
+	
+	Name "WxXcxTaskAddCartByGroupIDByTaskID"
+	Type "json"
+	Ask {
+		
+		# 是否为组合; true: 组合；false: 单品
+		IsCombination bool  
+		
+		# 规格ID
+		SkuId         string [ binding:"required"      ]
+		
+		# 购买数量
+		Count         uint32 [ binding:"required,gt=0" ]
+	}
+	Params {
+		GroupID uint32 [ form:"group_id" binding:"required,gt=0" ]
+		TaskID  uint32 [ form:"task_id"  binding:"required,gt=0" ]
+	}
+}
+
+
+
+# 从购物车中删除
+POST "/group_buying_order/wx_xcx/cart/delete_cart/:group_id" {
+	
+	Name "WxXcxCartDeleteCartByGroupID"
+	Type "json"
+	Ask {
+		CartIds array<string>
+	}
+	Params {
+		GroupID uint32 [ form:"group_id" binding:"required,gt=0" ]
+	}
+}
+
+
+
+# 修改购买数目
+POST "/group_buying_order/wx_xcx/cart/change_count/:group_id" {
+	
+	Name "WxXcxCartChangeCountByGroupID"
+	Type "json"
+	Ask {
+		
+		# 购物车项ID
+		CartId string
+		
+		# 购买数目
+		Count  uint32
+	}
+	Params {
+		GroupID uint32 [ form:"group_id" binding:"required,gt=0" ]
+	}
+}
+
+
+
+# 购物车数目
+GET "/group_buying_order/wx_xcx/cart/cart_count/:group_id" {
+	
+	Name "WxXcxTaskCartCountByGroupID"
+	Type "json"
+	Ack {
+		Count uint32
+	}
+	Params {
+		GroupID uint32 [ form:"group_id" binding:"required,gt=0" ]
+	}
+}
+
+
+
+# 购物车列表
+GET "/group_buying_order/wx_xcx/cart/cart_list/:group_id" {
+	
+	Name "WxXcxCartCartListByGroupID"
+	Type "json"
+	Ack {
+		
+		# 总记录数
+		Count uint32                              
+		
+		# 列表
+		List  array<GroupBuyingOrderCommunityCart>
+	}
+	Params {
+		
+		# 社群ID
+		GroupID uint32 [ form:"group_id" ]
+	}
+	Query {
+		
+		# 页码
+		Page     uint32 [ form:"page"      binding:"required,gt=0"       ]
+		
+		# 分页大小
+		PageSize uint32 [ form:"page_size" binding:"required,gt=0,lt=50" ]
+	}
+}
+
+
+
+# 从购物车提交订单
+POST "/group_buying_order/wx_xcx/order/add_order/:group_id" {
+	
+	Name "WxXcxOrderAddOrderByGroupID"
+	Type "json"
+	Ask {
+		
+		# 购物车项ID
+		CartIds array<string>
+	}
+	Ack {
+		SuccessCartIds array<string>
+	}
+	Params {
+		GroupID uint32 [ form:"group_id" binding:"required,gt=0" ]
+	}
+}
+
+
+
+# 直接提交订单
+struct AskDirectlyAddOrderItem {
+	
+	# 任务ID
+	TaskId        uint32 [ binding:"required,gt=0" ]
+	
+	# 规格ID
+	SkuId         string [ binding:"required"      ]
+	
+	# 是否为组合; true: 组合；false: 单品
+	IsCombination bool  
+	
+	# 购买数量
+	Count         uint32 [ binding:"required,gt=0" ]
+}
+
+struct AckDirectlyAddOrderResultItem {
+	TaskId  uint32
+	SkuId   string
+	Message string
+}
+
+POST "/group_buying_order/wx_xcx/order/directly_add/:group_id" {
+	
+	Name "WxXcxOrderDirectlyAddByGroupID"
+	Type "json"
+	Ask {
+		
+		# 购物车购买项
+		Items array<AskDirectlyAddOrderItem> [ binding:"required,dive,required" ]
+	}
+	Ack {
+		
+		# 订单ID
+		OrderId   string                              
+		
+		# 购买结果
+		ErrorList array<AckDirectlyAddOrderResultItem>
+	}
+	Params {
+		GroupID uint32 [ form:"group_id" binding:"required,gt=0" ]
+	}
+}
+
+
+
+# 订单列表
+GET "/group_buying_order/wx_xcx/order/order_list/:group_id" {
+	
+	Name "WxXcxOrderOrderListByGroupID"
+	Type "json"
+	Ack {
+		
+		# 总记录数
+		Count uint32                               
+		
+		# 列表
+		List  array<GroupBuyingOrderCommunityOrder>
+	}
+	Params {
+		
+		# 社群ID
+		GroupID uint32 [ form:"group_id" binding:"required,gt=0" ]
+	}
+	Query {
+		
+		# 页码
+		Page     uint32 [ form:"page"      binding:"required,gt=0"       ]
+		
+		# 分页大小
+		PageSize uint32 [ form:"page_size" binding:"required,gt=0,lt=50" ]
+	}
+}
+
+
+
+# 商品购买列表
+GET "/group_buying_order/wx_xcx/buy/task_list/:group_id" {
+	
+	Name "WxXcxBuyTaskListByGroupID"
+	Type "json"
+	Ack {
+		Count uint32                                 
+		List  array<GroupBuyingOrderCommunityBuyTask>
+	}
+	Params {
+		GroupID uint32 [ form:"group_id" binding:"required,gt=0" ]
+	}
+	Query {
+		
+		# 页码
+		Page     uint32 [ form:"page"      binding:"required,gt=0"       ]
+		
+		# 分页大小
+		PageSize uint32 [ form:"page_size" binding:"required,gt=0,lt=50" ]
+	}
+}
+
+
+
+# 商品状态
+GET "/group_buying_order/wx_xcx/task/status/:task_id" {
+	
+	Name "WxXcxTaskStatusByTaskID"
+	Type "json"
+	Ack {
+		
+		# 显示状态（上下架状态）
+		ShowState  GroupBuyingTaskShowState  [ db:"show_state"  ]
+		
+		# 团购状态
+		GroupState GroupBuyingTaskGroupState [ db:"group_state" ]
+		
+		# 下单状态
+		OrderState GroupBuyingTaskOrderState [ db:"order_state" ]
+		
+		# 销售量
+		Sales      uint32                    [ db:"sales"       ]
+	}
+	Params {
+		TaskID uint32 [ form:"task_id" ]
+	}
+}
+
+
+
+# 团购任务库存
+GET "/group_buying_order/wx_xcx/task/inventory/:task_id" {
+	
+	Name "WxXcxTaskInventoryByTaskID"
+	Type "json"
+	Ack {
+		Inventories map<string,GroupBuyingOrderInventory>
+	}
+	Params {
+		TaskID uint32 [ form:"task_id" ]
+	}
+}
+
+

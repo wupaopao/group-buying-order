@@ -1,0 +1,3 @@
+agency-service: "127.0.0.1:9001"
+community-service: "127.0.0.1:9003"
+user-service: "127.0.0.1:9002"

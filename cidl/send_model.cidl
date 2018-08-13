@@ -1,0 +1,229 @@
+
+# 送货单状态
+enum GroupBuyingSendState { 
+	
+	# 默认
+	GroupBuyingSendStateDefault         0
+	
+	# 送货单数据生成中
+	GroupBuyingSendStateStatistic       1
+	
+	# 送货单数据生成完成
+	GroupBuyingSendStateFinishStatistic 2
+	
+	# 送货单数据生成失败
+	GroupBuyingSendStateFailStatistic   3
+}
+
+
+# 配送单简介项
+struct GroupBuyingSendTaskBriefItem {
+	
+	# 任务ID
+	TaskId    uint32  
+	
+	# 任务名称
+	Title     string  
+	
+	# 开团日期
+	StartTime datetime
+	
+	# 结团日期
+	EndTime   datetime
+}
+
+
+# 配送单
+struct GroupBuyingSend {
+	
+	# 配送单ID
+	SendId           string                        [ db:"snd_id"       ]
+	
+	# 团购任务简单信息
+	TasksBrief       GroupBuyingSendTasksBriefType [ db:"tasks_brief"  ]
+	
+	# 团购任务详细信息
+	TasksDetail      string                        [ db:"tasks_detail" ]
+	
+	# 组织Id
+	OrganizationId   uint32                        [ db:"org_id"       ]
+	
+	# 组织名称
+	OrganizationName string                        [ db:"org_name"     ]
+	
+	# 送货单状态
+	State            GroupBuyingSendState          [ db:"state"        ]
+	
+	# excel存储url
+	ExcelUrl         string                        [ db:"excel_url"    ]
+	
+	# 版本
+	Version          uint32                        [ db:"version"      ]
+	
+	# 创建时间
+	CreateTime       datetime                      [ db:"create_time"  ]
+}
+
+
+# 配送路线
+struct GroupBuyingSendLine {
+	
+	# 配送ID
+	SendId           string                           [ db:"send_id"           ]
+	
+	# 路线ID
+	LineId           uint32                           [ db:"lin_id"            ]
+	
+	# 路线名称
+	LineName         string                           [ db:"lin_name"          ]
+	
+	# 组织ID
+	OrganizationId   uint32                           [ db:"organization_id"   ]
+	
+	# 组织名称
+	OrganizationName string                           [ db:"organization_name" ]
+	
+	# 配送的社群数目
+	CommunityCount   uint32                           [ db:"community_count"   ]
+	
+	# 总结算金额
+	SettlementAmount float64                          [ db:"settlement_amount" ]
+	
+	# 统计数据
+	Statistics       GroupBuyingSendLineStatisticType [ db:"statistics"        ]
+	
+	# 配送日期
+	SendTime         datetime                         [ db:"send_time"         ]
+	
+	# 版本
+	Version          uint32                           [ db:"version"           ]
+	
+	# 创建时间
+	CreateTime       datetime                         [ db:"create_time"       ]
+}
+
+struct GroupBuyingSendLineStatisticsItem {
+	
+	# 团购任务ID
+	TaskId    uint32                                              
+	
+	# 团购任务标题
+	TaskTitle string                                              
+	Sku       map<string,GroupBuyingSendLineStatisticsItemSkuItem>
+}
+
+struct GroupBuyingSendLineStatisticsItemSkuItem {
+	.GroupBuyingSkuMapItem
+	
+	# 销量
+	Sales           uint32 
+	
+	# 社群数
+	CommunityCount  uint32 
+	
+	# 总成本
+	TotalCost       float64
+	
+	# 总结算额
+	TotalSettlement float64
+	
+	# 团购任务ID
+	TaskId          uint32 
+	
+	# 团购任务标题
+	Title           string 
+}
+
+
+# 社群配送记录
+struct GroupBuyingSendCommunity {
+	
+	# 配送单ID
+	SendId                  string                                [ db:"send_id"            ]
+	
+	# 社群ID
+	GroupId                 uint32                                [ db:"grp_id"             ]
+	
+	# 社群名名称
+	GroupName               string                                [ db:"grp_name"           ]
+	
+	# 社群地址
+	GroupAddress            string                                [ db:"grp_address"        ]
+	
+	# 社群管理员ID
+	GroupManagerUid         string                                [ db:"grp_manager_uid"    ]
+	
+	# 社群管理员姓名
+	GroupManagerName        string                                [ db:"grp_manager_name"   ]
+	
+	# 社群管理员手机
+	GroupManagerMobile      string                                [ db:"grp_manager_mobile" ]
+	
+	# 组织id
+	OrganizationId          uint32                                [ db:"org_id"             ]
+	
+	# 组织名称
+	OrganizationName        string                                [ db:"org_name"           ]
+	
+	# 组织地址
+	OrganizationAddress     string                                [ db:"org_address"        ]
+	
+	# 组织管理员ID
+	OrganizationManagerUid  string                                [ db:"org_manager_uid"    ]
+	
+	# 组织管理员姓名
+	OrganizationManagerName string                                [ db:"org_manager_name"   ]
+	
+	# 制单人员用户id
+	AuthorUid               string                                [ db:"author_uid"         ]
+	
+	# 制单人员姓名
+	AuthorName              string                                [ db:"author_name"        ]
+	
+	# 结算总额
+	SettlementAmount        float64                               [ db:"settlement_amount"  ]
+	
+	# 统计结果
+	Statistics              GroupBuyingSendCommunityStatisticType [ db:"statistics"         ]
+	
+	# 配送日期
+	SendTime                datetime                              [ db:"send_time"          ]
+	
+	# 版本
+	Version                 uint32                                [ db:"version"            ]
+	
+	# 创建时间
+	CreateTime              datetime                              [ db:"create_time"        ]
+}
+
+struct GroupBuyingSendCommunityStatisticsItem {
+	
+	# 团购任务ID
+	TaskId    uint32                                                   
+	
+	# 团购任务标题
+	TaskTitle string                                                   
+	
+	# sku
+	Sku       map<string,GroupBuyingSendCommunityStatisticsItemSkuItem>
+}
+
+struct GroupBuyingSendCommunityStatisticsItemSkuItem {
+	.GroupBuyingSkuMapItem
+	
+	# 销量
+	Sales           uint32 
+	
+	# 总成本
+	TotalCost       float64
+	
+	# 总结算额
+	TotalSettlement float64
+	
+	# 团购任务ID
+	TaskId          uint32 
+	
+	# 团购任务标题
+	Title           string 
+}
+

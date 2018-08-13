@@ -1,0 +1,111 @@
+
+# 订货单状态
+enum IndentState { 
+	
+	# 默认
+	IndentStateDefault         0
+	
+	# 订货单数据生成中
+	IndentStateStatistic       1
+	
+	# 订货单数据生成完成
+	IndentStateFinishStatistic 2
+	
+	# 订货单数据生成失败
+	IndentStateFailStatistic   3
+}
+
+struct GroupBuyingIndentTasksBriefItem {
+	
+	# 任务ID
+	TaskId    uint32  
+	
+	# 任务名称
+	Title     string  
+	
+	# 开团日期
+	StartTime datetime
+	
+	# 结团日期
+	EndTime   datetime
+}
+
+
+# 订货单
+struct GroupBuyingIndent {
+	
+	# 订货单ID
+	IndentId       string                         [ db:"indent_id"   ]
+	
+	# 团购组织ID
+	OrganizationId uint32                         [ db:"org_id"      ]
+	
+	# 团购任务简单信息
+	TasksBrief     GroupBuyingIndentTaskBriefType [ db:"tasks_brief" ]
+	
+	# 订货单状态
+	State          IndentState                    [ db:"state"       ]
+	
+	# excel存储url
+	ExcelUrl       string                         [ db:"excel_url"   ]
+	
+	# 版本
+	Version        uint32                         [ db:"version"     ]
+	
+	# 创建时间
+	CreateTime     datetime                       [ db:"create_time" ]
+}
+
+
+# 订货单统计
+struct GroupBuyingIndentStatistics {
+	
+	# 订货单id
+	IndentId    string                                [ db:"indent_id"    ]
+	
+	# 团购任务id
+	TaskId      uint32                                [ db:"task_id"      ]
+	
+	# 团购任务内容
+	TaskContent GroupBuyingOrderTaskContent           [ db:"task_content" ]
+	
+	# 统计结果
+	Result      GroupBuyingIndentStatisticsResultType [ db:"result"       ]
+	
+	# 版本
+	Version     uint32                                [ db:"version"      ]
+	
+	# 创建时间
+	CreateTime  datetime                              [ db:"create_time"  ]
+}
+
+
+# 订货单统计项
+struct GroupBuyingIndentStatisticResultItem {
+	.GroupBuyingSkuMapItem
+	
+	# 销量
+	Sales           uint32 
+	
+	# 社群数
+	CommunityCount  uint32 
+	
+	# 总成本
+	TotalCost       float64
+	
+	# 总结算额
+	TotalSettlement float64
+	
+	# 团购任务ID
+	TaskId          uint32 
+	
+	# 团购任务开始时间
+	StartTime       time   
+	
+	# 团购任务结束时间
+	EndTime         time   
+	
+	# 团购任务标题
+	Title           string 
+}
+
