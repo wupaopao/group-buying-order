@@ -417,6 +417,21 @@ POST "/group_buying_order/org/task/finish_buying/:organization_id/:task_id" {
 	}
 }
 
+# 确认配送
+POST "/group_buying_order/org/task/confirm_deliver/:organization_id/:task_id" {
+	
+	Name "OrgTaskConfirmDeliverByOrganizationIDByTaskID"
+	Type "json"
+	Params {
+		
+		# 团购组织ID
+		OrganizationID uint32 [ form:"organization_id" binding:"required,gt=0" ]
+		
+		# 团购任务ID
+		TaskID         uint32 [ form:"task_id"         binding:"required,gt=0" ]
+	}
+}
+
 
 
 # ####################订货单

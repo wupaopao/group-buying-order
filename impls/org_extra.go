@@ -35,6 +35,7 @@ func init() {
 	AddOrgSendAddByOrganizationIDHandler()
 
 	AddOrgIndentAddByOrganizationIDHandler()
+	AddOrgTaskConfirmDeliverByOrganizationIDByTaskIDHandler()
 
 }
 
@@ -1074,5 +1075,38 @@ func (m *OrgTaskLineListByOrganizationIDByTaskIDImpl) Handler(ctx *http.Context)
 	m.Ack.List = lines
 
 	ctx.Json(m.Ack)
+}
+
+//确认配送 
+type OrgTaskConfirmDeliverByOrganizationIDByTaskIDImpl struct {
+	cidl.ApiOrgTaskConfirmDeliverByOrganizationIDByTaskID
+}
+
+func AddOrgTaskConfirmDeliverByOrganizationIDByTaskIDHandler() {
+	AddHandler(
+		cidl.META_ORG_TASK_CONFIRM_DELIVER_BY_ORGANIZATION_ID_BY_TASK_ID,
+		func() http.ApiHandler {
+			return &OrgTaskConfirmDeliverByOrganizationIDByTaskIDImpl{
+				ApiOrgTaskConfirmDeliverByOrganizationIDByTaskID: cidl.MakeApiOrgTaskConfirmDeliverByOrganizationIDByTaskID(),
+			}
+		},
+	)
+}
+
+func (m *OrgTaskConfirmDeliverByOrganizationIDByTaskIDImpl) Handler(ctx *http.Context) {
+	var (
+		err error
+	)
+	organizationId := m.Params.OrganizationID
+	taskId := m.Params.TaskID
+
+	dbGroupBuying := db.NewMallGroupBuyingOrder()
+	_, err = dbGroupBuying.UpdateTaskGroupState(organizationId, taskId, cidl.GroupBuyingTaskGroupStateDelivered)
+	if err != nil {
+		ctx.Errorf(api.ErrDBUpdateFailed, "set task confirm deliver failed. %s", err)
+		return
+	}
+
+	ctx.Succeed()
 }
 

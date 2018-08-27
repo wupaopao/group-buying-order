@@ -573,6 +573,37 @@ func MakeApiOrgTaskFinishBuyingByOrganizationIDByTaskID() ApiOrgTaskFinishBuying
 	return ApiOrgTaskFinishBuyingByOrganizationIDByTaskID{}
 }
 
+type MetaApiOrgTaskConfirmDeliverByOrganizationIDByTaskID struct {
+}
+
+var META_ORG_TASK_CONFIRM_DELIVER_BY_ORGANIZATION_ID_BY_TASK_ID = &MetaApiOrgTaskConfirmDeliverByOrganizationIDByTaskID{}
+
+func (m *MetaApiOrgTaskConfirmDeliverByOrganizationIDByTaskID) GetMethod() string { return "POST" }
+func (m *MetaApiOrgTaskConfirmDeliverByOrganizationIDByTaskID) GetURL() string {
+	return "/group_buying_order/org/task/confirm_deliver/:organization_id/:task_id"
+}
+func (m *MetaApiOrgTaskConfirmDeliverByOrganizationIDByTaskID) GetName() string {
+	return "OrgTaskConfirmDeliverByOrganizationIDByTaskID"
+}
+func (m *MetaApiOrgTaskConfirmDeliverByOrganizationIDByTaskID) GetType() string { return "json" }
+
+// 确认配送
+type ApiOrgTaskConfirmDeliverByOrganizationIDByTaskID struct {
+	MetaApiOrgTaskConfirmDeliverByOrganizationIDByTaskID
+	Params struct {
+		OrganizationID uint32 `form:"organization_id" binding:"required,gt=0" db:"OrganizationID"`
+		TaskID         uint32 `form:"task_id" binding:"required,gt=0" db:"TaskID"`
+	}
+}
+
+func (m *ApiOrgTaskConfirmDeliverByOrganizationIDByTaskID) GetQuery() interface{}  { return nil }
+func (m *ApiOrgTaskConfirmDeliverByOrganizationIDByTaskID) GetParams() interface{} { return &m.Params }
+func (m *ApiOrgTaskConfirmDeliverByOrganizationIDByTaskID) GetAsk() interface{}    { return nil }
+func (m *ApiOrgTaskConfirmDeliverByOrganizationIDByTaskID) GetAck() interface{}    { return nil }
+func MakeApiOrgTaskConfirmDeliverByOrganizationIDByTaskID() ApiOrgTaskConfirmDeliverByOrganizationIDByTaskID {
+	return ApiOrgTaskConfirmDeliverByOrganizationIDByTaskID{}
+}
+
 type AskOrgIndentAddByOrganizationID struct {
 	TaskIds []uint32 `binding:"required,gt=0" db:"TaskIds"`
 }
