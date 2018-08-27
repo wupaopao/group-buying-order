@@ -32,3 +32,26 @@ type GroupBuyingLineCommunity struct {
 func NewGroupBuyingLineCommunity() *GroupBuyingLineCommunity {
 	return &GroupBuyingLineCommunity{}
 }
+
+// 团购任务绑定路线
+type GroupBuyingTaskLine struct {
+	LineId     uint32    `db:"LineId"`
+	LineName   string    `db:"LineName"`
+	IsSelected bool      `db:"IsSelected"`
+	UpdateTime time.Time `db:"UpdateTime"`
+}
+
+func NewGroupBuyingTaskLine() *GroupBuyingTaskLine {
+	return &GroupBuyingTaskLine{}
+}
+
+type GroupBuyingTaskLineIDs struct {
+	TaskId  uint32   `db:"TaskId"`
+	LineIds []uint32 `db:"LineIds"`
+}
+
+func NewGroupBuyingTaskLineIDs() *GroupBuyingTaskLineIDs {
+	return &GroupBuyingTaskLineIDs{
+		LineIds: make([]uint32, 0),
+	}
+}

@@ -84,6 +84,9 @@ type GroupBuyingOrderTaskContent struct {
 	EndTime              time.Time                          `db:"end_time"`
 	SellType             GroupBuyingOrderTaskSellType       `db:"sell_type"`
 	Version              uint32                             `db:"version"`
+	AllowCancel          GroupBuyingTaskAllowCancelState    `db:"allow_cancel"`
+	TeamVisibleState     GroupBuyingTeamVisibleState        `db:"team_visible_state"`
+	TeamIds              []uint32                           `db:"TeamIds"`
 }
 
 func NewGroupBuyingOrderTaskContent() *GroupBuyingOrderTaskContent {
@@ -91,6 +94,7 @@ func NewGroupBuyingOrderTaskContent() *GroupBuyingOrderTaskContent {
 		IllustrationPictures: NewTaskIllustrationPicturesType(),
 		Info:                 NewTaskInfoType(),
 		Specification:        NewGroupBuyingOrderTaskSpecification(),
+		TeamIds:              make([]uint32, 0),
 	}
 }
 
@@ -185,6 +189,7 @@ type GroupBuyingOrderCommunityOrder struct {
 	TotalCostPrice        float64                    `db:"total_cost_price"`
 	Version               uint32                     `db:"version"`
 	CreateTime            time.Time                  `db:"create_time"`
+	AllowCancel           bool                       `db:"allow_cancel"`
 }
 
 func NewGroupBuyingOrderCommunityOrder() *GroupBuyingOrderCommunityOrder {

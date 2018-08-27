@@ -13,7 +13,7 @@ import (
 	"business/group-buying-order/common/excel"
 	"business/user/proxy/user"
 
-	"github.com/mz-eco/mz/errors"
+	//"github.com/mz-eco/mz/errors"
 	"github.com/mz-eco/mz/kafka"
 	"github.com/mz-eco/mz/log"
 	"github.com/mz-eco/mz/settings"
@@ -389,7 +389,7 @@ func (m *TopicGroupBuyingServiceHandler) AddSend(msg *AddSendMessage) (err error
 	var taskIds []uint32
 	taskBriefMap := make(map[uint32]*cidl.GroupBuyingSendTaskBriefItem)
 	for _, taskBrief := range *send.TasksBrief {
-		taskIds = append(taskIds, taskBrief.TaskId)
+		taskIds = append(taskIds,taskBrief.TaskId)
 		taskBriefMap[taskBrief.TaskId] = taskBrief
 	}
 
@@ -413,8 +413,15 @@ func (m *TopicGroupBuyingServiceHandler) AddSend(msg *AddSendMessage) (err error
 	// lineId -> groupId -> bool
 	lineCommunityCountMap := make(map[uint32]map[uint32]bool)
 
-	for i := uint32(1); ; i++ {
-		list, errList := dbGroupBuying.CommunityBuyListByTaskIdsOrderTaskIdSkuId(taskIds, i, 100)
+	for _,taskBrief := range taskBriefMap {
+		//更新已导出线路	
+		_, err = dbGroupBuying.UpdateTaskSelectedLines(taskBrief.TaskId, taskBrief.LineIds)
+		if err != nil {
+			log.Warnf("update task selected line failed. %s", err)
+			return
+		}
+
+		list, errList := dbGroupBuying.CommunityBuyListByTaskIdLineIdsOrderSkuId(taskBrief.TaskId, taskBrief.LineIds)
 		if errList != nil {
 			err = errList
 			log.Warnf("get community buy list by task ids failed. %s", err)
@@ -423,12 +430,7 @@ func (m *TopicGroupBuyingServiceHandler) AddSend(msg *AddSendMessage) (err error
 
 		if len(list) == 0 {
 			// 没有记录
-			if i == 1 {
-				err = errors.New("no community buy")
-				return
-			}
-
-			break
+			continue	
 		}
 
 		for _, communityBuy := range list { // 逐个购买记录
@@ -662,9 +664,9 @@ func (m *TopicGroupBuyingServiceHandler) AddSend(msg *AddSendMessage) (err error
 
 	sendExcel.Date = send.CreateTime
 	sendExcel.OrganizationName = send.OrganizationName
-	sendExcel.TicketNumber = fmt.Sprintf("%s%s",
+	sendExcel.TicketNumber = fmt.Sprintf("%s%s%s",
 		sendExcel.Date.Format("20060102150405"),
-		send.SendId[:2])
+		send.SendId[:4],)
 
 	sendLineMap := make(map[uint32]*cidl.GroupBuyingSendLine)
 
@@ -722,6 +724,21 @@ func (m *TopicGroupBuyingServiceHandler) AddSend(msg *AddSendMessage) (err error
 		sendLineMap[lineId] = sendLine
 	}
 
+	// 团长销售额简报 
+	groupSummarySheets := sendExcel.GetGroupSummarySheets()
+	for _, groupCountMap := range lineCommunityCountMap {
+		for groupId, _ := range groupCountMap {
+			sendCommunity := sendCommunityMap[groupId]
+		       	groupSummarySheets.AddLineRow(
+				sendCommunity.GroupName,
+				sendCommunity.GroupManagerName,
+				sendCommunity.GroupManagerMobile,
+				sendCommunity.SettlementAmount,
+			)
+		}
+	}
+
+
 	// 路线团购任务统计
 	for lineId, groupCountMap := range lineCommunityCountMap {
 		sendLine := sendLineMap[lineId]
@@ -752,6 +769,7 @@ func (m *TopicGroupBuyingServiceHandler) AddSend(msg *AddSendMessage) (err error
 			sendLine.SettlementAmount,
 		)
 	}
+
 
 	// 生成路线商品统计和社群商品统计
 	for lineId, groupCountMap := range lineCommunityCountMap {

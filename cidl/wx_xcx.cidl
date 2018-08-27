@@ -54,7 +54,7 @@ struct AckWxXcxTaskListItem {
 
 
 # 今日团购
-GET "/group_buying_order/wx_xcx/task/today_list/:organization_id" {
+GET "/group_buying_order/wx_xcx/task/today_list/:organization_id/:group_id" {
 	
 	Name "WxXcxTaskTodayListByOrganizationID"
 	Type "json"
@@ -68,6 +68,7 @@ GET "/group_buying_order/wx_xcx/task/today_list/:organization_id" {
 	}
 	Params {
 		OrganizationID uint32 [ form:"organization_id" binding:"required,gt=0" ]
+		GroupID uint32 [ form:"group_id" binding:"required,gt=0" ]
 	}
 	Query {
 		
@@ -82,7 +83,7 @@ GET "/group_buying_order/wx_xcx/task/today_list/:organization_id" {
 
 
 # 未来团购
-GET "/group_buying_order/wx_xcx/task/future_list/:organization_id" {
+GET "/group_buying_order/wx_xcx/task/future_list/:organization_id/:group_id" {
 	
 	Name "WxXcxTaskFutureListByOrganizationID"
 	Type "json"
@@ -96,6 +97,7 @@ GET "/group_buying_order/wx_xcx/task/future_list/:organization_id" {
 	}
 	Params {
 		OrganizationID uint32 [ form:"organization_id" binding:"required,gt=0" ]
+		GroupID uint32 [ form:"group_id" binding:"required,gt=0" ]
 	}
 	Query {
 		
@@ -110,7 +112,7 @@ GET "/group_buying_order/wx_xcx/task/future_list/:organization_id" {
 
 
 # 历史团购
-GET "/group_buying_order/wx_xcx/task/history_list/:organization_id" {
+GET "/group_buying_order/wx_xcx/task/history_list/:organization_id/:group_id" {
 	
 	Name "WxXcxTaskHistoryListByOrganizationID"
 	Type "json"
@@ -124,6 +126,7 @@ GET "/group_buying_order/wx_xcx/task/history_list/:organization_id" {
 	}
 	Params {
 		OrganizationID uint32 [ form:"organization_id" binding:"required,gt=0" ]
+		GroupID uint32 [ form:"group_id" binding:"required,gt=0" ]
 	}
 	Query {
 		
@@ -356,6 +359,7 @@ GET "/group_buying_order/wx_xcx/order/order_list/:group_id" {
 		
 		# 列表
 		List  array<GroupBuyingOrderCommunityOrder>
+		
 	}
 	Params {
 		

@@ -35,13 +35,16 @@ func (m GroupBuyingSendState) String() string {
 // 配送单简介项
 type GroupBuyingSendTaskBriefItem struct {
 	TaskId    uint32    `db:"TaskId"`
+	LineIds   []uint32  `db:"LineIds"`
 	Title     string    `db:"Title"`
 	StartTime time.Time `db:"StartTime"`
 	EndTime   time.Time `db:"EndTime"`
 }
 
 func NewGroupBuyingSendTaskBriefItem() *GroupBuyingSendTaskBriefItem {
-	return &GroupBuyingSendTaskBriefItem{}
+	return &GroupBuyingSendTaskBriefItem{
+		LineIds: make([]uint32, 0),
+	}
 }
 
 // 配送单

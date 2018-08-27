@@ -120,6 +120,26 @@ enum GroupBuyingTaskShowState {
 	GroupBuyingTaskShowStateHidden 0
 }
 
+# 社团群组可见状态
+enum GroupBuyingTeamVisibleState { 
+	
+	# 全部可见
+	GroupBuyingTeamVisibleStateAll  1 
+	
+	# 部分可见 
+	GroupBuyingTeamVisibleStatePart   0
+}
+
+
+enum GroupBuyingTaskAllowCancelState {
+	
+	#允许取消订单
+	GroupBuyingTaskAllowCancel 1
+	
+	#不允许取消订单
+	GroupBuyingTaskNotAllowCancel 0
+}
+
 
 # 团购任务状态
 enum GroupBuyingTaskGroupState { 
@@ -138,6 +158,9 @@ enum GroupBuyingTaskGroupState {
 	
 	# 已取消
 	GroupBuyingTaskGroupStateCancel         4
+	
+	# 已配送 
+	GroupBuyingTaskGroupStateDelivered 5
 }
 
 

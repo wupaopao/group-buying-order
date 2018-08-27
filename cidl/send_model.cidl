@@ -21,6 +21,9 @@ struct GroupBuyingSendTaskBriefItem {
 	
 	# 任务ID
 	TaskId    uint32  
+
+	# 路线ID
+	LineIds	  array<uint32>
 	
 	# 任务名称
 	Title     string  

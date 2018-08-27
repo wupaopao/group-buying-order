@@ -53,3 +53,26 @@ struct GroupBuyingLineCommunity {
 	CreateTime     datetime [ db:"create_time"    ]
 }
 
+# 团购任务绑定路线
+struct GroupBuyingTaskLine {
+
+	# 路线ID
+	LineId         uint32  
+
+	#路线名称
+	LineName        string    
+
+	#是否选中
+	IsSelected      bool     
+
+	#路线导出时间(IsSelected为true时有值)
+	UpdateTime     datetime 
+}
+
+struct GroupBuyingTaskLineIDs {
+	# 任务ID
+	TaskId		uint32
+	
+	#已选择路线IDs
+	LineIds		array<uint32>	
+}

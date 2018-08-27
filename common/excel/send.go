@@ -80,6 +80,10 @@ func (m *SendExcel) sendCommunitySheetTemplateName() string {
 	return "模板-社群"
 }
 
+func (m *SendExcel) groupSummarySheetTemplateName() string {
+	return "团长销售额简报"
+}
+
 func (m *SendExcel) AddTaskSummarySheets(sheetName string, tasks []*cidl.GroupBuyingOrderTask, groupMap map[uint32]*community.Group, sendCommunityMap map[uint32]*cidl.GroupBuyingSendCommunity) (err error) {
 	taskSummarySheets := &TaskSummarySheets{
 		SendExcel:        m,
@@ -100,6 +104,14 @@ func (m *SendExcel) AddTaskSummarySheets(sheetName string, tasks []*cidl.GroupBu
 
 func (m *SendExcel) GetSendLineSummarySheets() (sendLineSummarySheets *SendLineSummarySheets) {
 	sendLineSummarySheets = &SendLineSummarySheets{
+		ExcelFile: m.ExcelFile,
+		SendExcel: m,
+	}
+	return
+}
+
+func (m *SendExcel) GetGroupSummarySheets() (groupSummarySheets *GroupSummarySheets) {
+	groupSummarySheets = &GroupSummarySheets{
 		ExcelFile: m.ExcelFile,
 		SendExcel: m,
 	}
@@ -238,6 +250,73 @@ func (m *TaskSummarySheets) InitSheets() (err error) {
 
 	return
 }
+
+/**
+团长销售额简报
+*/
+type GroupSummarySheets struct {
+	SendExcel *SendExcel
+
+	// excel文件
+	ExcelFile *excelize.File
+
+	// 当前有效的sheet
+	activeSheet string
+
+	// 路线项行编号
+	activeLineRowsCount uint32
+
+	// sheet数目
+	//sheetCount uint32
+
+	// 配送社区
+	SendCommunity *cidl.GroupBuyingSendCommunity
+}
+
+func (m *GroupSummarySheets) newSheet() (sheet string, err error) {
+	xlsx := m.ExcelFile
+	//m.sheetCount++
+	sheet = fmt.Sprintf("团长销售额简报")
+
+	index := xlsx.NewSheet(sheet)
+	templateSheetIndex := xlsx.GetSheetIndex(m.SendExcel.groupSummarySheetTemplateName())
+	err = xlsx.CopySheet(templateSheetIndex, index)
+	if err != nil {
+		log.Warnf("copy group summary sheet failed. %s", err)
+		return
+	}
+
+	m.activeSheet = sheet
+
+	return
+}
+
+func (m *GroupSummarySheets) AddLineRow(groupName string, groupManagerName string, groupManagerMobile string, settlementAmount float64) (err error) {
+	if m.activeSheet == "" {
+		_, err = m.newSheet()
+		if err != nil {
+			log.Warnf("new sheet failed. %s", err)
+			return
+		}
+
+		m.activeLineRowsCount = 0
+	}
+
+	xlsx := m.ExcelFile
+	sheet := m.activeSheet
+	rowIndex := m.activeLineRowsCount + 2
+
+	xlsx.SetCellValue(sheet, fmt.Sprintf("A%d", rowIndex), m.SendExcel.TicketNumber)
+	xlsx.SetCellValue(sheet, fmt.Sprintf("B%d", rowIndex), groupName)
+	xlsx.SetCellValue(sheet, fmt.Sprintf("C%d", rowIndex), groupManagerName)
+	xlsx.SetCellValue(sheet, fmt.Sprintf("D%d", rowIndex), groupManagerMobile)
+	xlsx.SetCellValue(sheet, fmt.Sprintf("E%d", rowIndex), settlementAmount)
+	xlsx.SetCellValue(sheet, fmt.Sprintf("F%d", rowIndex), m.SendExcel.Date)
+
+	m.activeLineRowsCount++
+	return
+}
+
 
 /**
 配送路线汇总对账单

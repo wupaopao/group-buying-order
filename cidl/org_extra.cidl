@@ -152,6 +152,16 @@ POST "/group_buying_order/org/task/add/:organization_id" {
 		
 		# 是否上架
 		ShowState            GroupBuyingTaskShowState       
+
+		#是否允许取消订单    
+		AllowCancel	     GroupBuyingTaskAllowCancelState
+		
+		# 是否部分社团群组可见
+		TeamVisibleState     GroupBuyingTeamVisibleState
+
+		# 可见群组ID
+		TeamIds              array<uint32>
+		
 		
 		# 第二步
 		# 商品名称
@@ -443,7 +453,7 @@ POST "/group_buying_order/org/send/add/:organization_id" {
 	Ask {
 		
 		# 团购任务ID
-		TaskIds array<uint32> [ binding:"required,gt=0" ]
+		TaskLineIds array<GroupBuyingTaskLineIDs> [ binding:"required,gt=0" ]
 	}
 	Ack {
 		
@@ -455,4 +465,19 @@ POST "/group_buying_order/org/send/add/:organization_id" {
 	}
 }
 
+# ################## 路线
+# # 团购任务路线
+GET "/group_buying_order/org/task/line_list/:organization_id/:task_id" {
 
+	Name "OrgTaskLineListByOrganizationIDByTaskID"
+	Type "json"
+	Ack {
+		List array<GroupBuyingTaskLine>
+	}
+	Params {
+		# 组织ID
+		OrganizationID uint32 [ form:"organization_id" binding:"required,gt=0" ]
+		# 团购任务ID
+		TaskID         uint32 [ form:"task_id"         binding:"required,gt=0" ]
+	}
+}

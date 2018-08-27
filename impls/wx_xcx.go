@@ -56,8 +56,19 @@ func (m *WxXcxTaskTodayListByOrganizationIDImpl) Handler(ctx *http.Context) {
 	)
 	ack := m.Ack
 	organizationId := m.Params.OrganizationID
+	/*groupId := m.Params.GroupID
+	
+
+	
+	team, err := community.NewProxy("community-service").InnerCommunityGroupTeamByGroupID(groupId)
+	if err != nil {
+		ctx.ProxyErrorf(err, "get community group team from proxy failed. %s", err)
+		return
+	}
+	teamIds = team.TeamIDs */
+	teamIds := []uint32{1}
 	dbGroupBuying := db.NewMallGroupBuyingOrder()
-	ack.Count, err = dbGroupBuying.TaskTodayCount(organizationId)
+	ack.Count, err = dbGroupBuying.TaskTodayCount(organizationId, teamIds)
 	if err != nil {
 		ctx.Errorf(api.ErrDbQueryFailed, "get today task count failed. %s", err)
 		return
@@ -68,7 +79,7 @@ func (m *WxXcxTaskTodayListByOrganizationIDImpl) Handler(ctx *http.Context) {
 		return
 	}
 
-	list, err := dbGroupBuying.TaskTodayList(organizationId, m.Query.Page, m.Query.PageSize, false)
+	list, err := dbGroupBuying.TaskTodayList(organizationId, teamIds, m.Query.Page, m.Query.PageSize, false)
 	if err != nil {
 		ctx.Errorf(api.ErrDbQueryFailed, "get today task list failed. %s", err)
 		return
@@ -1165,6 +1176,11 @@ func (m *WxXcxOrderOrderListByGroupIDImpl) Handler(ctx *http.Context) {
 		ctx.Json(m.Ack)
 		return
 	}
+	mCancelIdList, err := dbGroupBuyingOrder.CommunityAllowCancelOrderList(groupId)
+	if err != nil {
+		ctx.Errorf(api.ErrDbQueryFailed, "get allow cancel order failed. %s", err)
+		return
+	}
 
 	list, err := dbGroupBuyingOrder.CommunityOrderList(groupId, m.Query.Page, m.Query.PageSize, false)
 	if err != nil {
@@ -1173,6 +1189,12 @@ func (m *WxXcxOrderOrderListByGroupIDImpl) Handler(ctx *http.Context) {
 	}
 
 	for _, communityOrder := range list {
+		orderId := communityOrder.OrderId
+		if _,ok := mCancelIdList[orderId];ok{
+			communityOrder.AllowCancel = true
+		}else {
+			communityOrder.AllowCancel = false
+		}
 		for _, communityBuy := range *communityOrder.GoodsDetail {
 			buyDetail := communityBuy.BuyDetail
 			if buyDetail.IsCombination { // 组合

@@ -51,7 +51,7 @@ var META_WX_XCX_TASK_TODAY_LIST_BY_ORGANIZATION_ID = &MetaApiWxXcxTaskTodayListB
 
 func (m *MetaApiWxXcxTaskTodayListByOrganizationID) GetMethod() string { return "GET" }
 func (m *MetaApiWxXcxTaskTodayListByOrganizationID) GetURL() string {
-	return "/group_buying_order/wx_xcx/task/today_list/:organization_id"
+	return "/group_buying_order/wx_xcx/task/today_list/:organization_id/:group_id"
 }
 func (m *MetaApiWxXcxTaskTodayListByOrganizationID) GetName() string {
 	return "WxXcxTaskTodayListByOrganizationID"
@@ -64,6 +64,7 @@ type ApiWxXcxTaskTodayListByOrganizationID struct {
 	Ack    *AckWxXcxTaskTodayListByOrganizationID
 	Params struct {
 		OrganizationID uint32 `form:"organization_id" binding:"required,gt=0" db:"OrganizationID"`
+		GroupID        uint32 `form:"group_id" binding:"required,gt=0" db:"GroupID"`
 	}
 	Query struct {
 		Page     uint32 `form:"page" binding:"required,gt=0" db:"Page"`
@@ -99,7 +100,7 @@ var META_WX_XCX_TASK_FUTURE_LIST_BY_ORGANIZATION_ID = &MetaApiWxXcxTaskFutureLis
 
 func (m *MetaApiWxXcxTaskFutureListByOrganizationID) GetMethod() string { return "GET" }
 func (m *MetaApiWxXcxTaskFutureListByOrganizationID) GetURL() string {
-	return "/group_buying_order/wx_xcx/task/future_list/:organization_id"
+	return "/group_buying_order/wx_xcx/task/future_list/:organization_id/:group_id"
 }
 func (m *MetaApiWxXcxTaskFutureListByOrganizationID) GetName() string {
 	return "WxXcxTaskFutureListByOrganizationID"
@@ -112,6 +113,7 @@ type ApiWxXcxTaskFutureListByOrganizationID struct {
 	Ack    *AckWxXcxTaskFutureListByOrganizationID
 	Params struct {
 		OrganizationID uint32 `form:"organization_id" binding:"required,gt=0" db:"OrganizationID"`
+		GroupID        uint32 `form:"group_id" binding:"required,gt=0" db:"GroupID"`
 	}
 	Query struct {
 		Page     uint32 `form:"page" binding:"required,gt=0" db:"Page"`
@@ -147,7 +149,7 @@ var META_WX_XCX_TASK_HISTORY_LIST_BY_ORGANIZATION_ID = &MetaApiWxXcxTaskHistoryL
 
 func (m *MetaApiWxXcxTaskHistoryListByOrganizationID) GetMethod() string { return "GET" }
 func (m *MetaApiWxXcxTaskHistoryListByOrganizationID) GetURL() string {
-	return "/group_buying_order/wx_xcx/task/history_list/:organization_id"
+	return "/group_buying_order/wx_xcx/task/history_list/:organization_id/:group_id"
 }
 func (m *MetaApiWxXcxTaskHistoryListByOrganizationID) GetName() string {
 	return "WxXcxTaskHistoryListByOrganizationID"
@@ -160,6 +162,7 @@ type ApiWxXcxTaskHistoryListByOrganizationID struct {
 	Ack    *AckWxXcxTaskHistoryListByOrganizationID
 	Params struct {
 		OrganizationID uint32 `form:"organization_id" binding:"required,gt=0" db:"OrganizationID"`
+		GroupID        uint32 `form:"group_id" binding:"required,gt=0" db:"GroupID"`
 	}
 	Query struct {
 		Page     uint32 `form:"page" binding:"required,gt=0" db:"Page"`

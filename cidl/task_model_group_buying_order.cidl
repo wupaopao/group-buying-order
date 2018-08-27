@@ -110,6 +110,16 @@ struct GroupBuyingOrderTaskContent {
 	
 	# 记录版本
 	Version              uint32                            [ db:"version"               ]
+	
+	# 是否允许取消订单
+	AllowCancel	     GroupBuyingTaskAllowCancelState   [ db:"allow_cancel"   ]
+	
+	# 是否部分社团群组可见
+	TeamVisibleState     GroupBuyingTeamVisibleState  [ db:"team_visible_state"   ]
+	
+	# 可见群组ID
+	TeamIds              array<uint32>
+	
 }
 
 
@@ -292,6 +302,9 @@ struct GroupBuyingOrderCommunityOrder {
 	
 	# 创建时间
 	CreateTime            datetime                  [ db:"create_time"              ]
+	
+	# 允许取消
+	AllowCancel	      bool			[ db:"allow_cancel"		] 
 }
 
 

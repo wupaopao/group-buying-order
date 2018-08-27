@@ -108,6 +108,49 @@ func (m GroupBuyingTaskShowState) String() string {
 	}
 }
 
+// 社团群组可见状态
+type GroupBuyingTeamVisibleState int
+
+const (
+	// 全部可见
+	GroupBuyingTeamVisibleStateAll GroupBuyingTeamVisibleState = 1
+	// 部分可见
+	GroupBuyingTeamVisibleStatePart GroupBuyingTeamVisibleState = 0
+)
+
+func (m GroupBuyingTeamVisibleState) String() string {
+	switch m {
+
+	case GroupBuyingTeamVisibleStateAll:
+		return "GroupBuyingTeamVisibleStateAll<enum GroupBuyingTeamVisibleState>"
+	case GroupBuyingTeamVisibleStatePart:
+		return "GroupBuyingTeamVisibleStatePart<enum GroupBuyingTeamVisibleState>"
+	default:
+		return "UNKNOWN_Name_<GroupBuyingTeamVisibleState>"
+	}
+}
+
+type GroupBuyingTaskAllowCancelState int
+
+const (
+	//允许取消订单
+	GroupBuyingTaskAllowCancel GroupBuyingTaskAllowCancelState = 1
+	//不允许取消订单
+	GroupBuyingTaskNotAllowCancel GroupBuyingTaskAllowCancelState = 0
+)
+
+func (m GroupBuyingTaskAllowCancelState) String() string {
+	switch m {
+
+	case GroupBuyingTaskAllowCancel:
+		return "GroupBuyingTaskAllowCancel<enum GroupBuyingTaskAllowCancelState>"
+	case GroupBuyingTaskNotAllowCancel:
+		return "GroupBuyingTaskNotAllowCancel<enum GroupBuyingTaskAllowCancelState>"
+	default:
+		return "UNKNOWN_Name_<GroupBuyingTaskAllowCancelState>"
+	}
+}
+
 // 团购任务状态
 type GroupBuyingTaskGroupState int
 
@@ -122,6 +165,8 @@ const (
 	GroupBuyingTaskGroupStateFinishBuying GroupBuyingTaskGroupState = 3
 	// 已取消
 	GroupBuyingTaskGroupStateCancel GroupBuyingTaskGroupState = 4
+	// 已配送
+	GroupBuyingTaskGroupStateDelivered GroupBuyingTaskGroupState = 5
 )
 
 func (m GroupBuyingTaskGroupState) String() string {
@@ -137,6 +182,8 @@ func (m GroupBuyingTaskGroupState) String() string {
 		return "GroupBuyingTaskGroupStateFinishBuying<enum GroupBuyingTaskGroupState>"
 	case GroupBuyingTaskGroupStateCancel:
 		return "GroupBuyingTaskGroupStateCancel<enum GroupBuyingTaskGroupState>"
+	case GroupBuyingTaskGroupStateDelivered:
+		return "GroupBuyingTaskGroupStateDelivered<enum GroupBuyingTaskGroupState>"
 	default:
 		return "UNKNOWN_Name_<GroupBuyingTaskGroupState>"
 	}

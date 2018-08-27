@@ -171,6 +171,8 @@ func (m *OrgTaskAddByOrganizationIDImpl) Handler(ctx *http.Context) {
 	task.Notes = ask.Notes
 	task.ShowState = ask.ShowState
 	task.Version = cidl.GroupBuyingTaskRecordVersion
+	task.AllowCancel = ask.AllowCancel
+	task.TeamVisibleState = ask.TeamVisibleState
 	task.Specification, err = cidl.NewGroupBuyingTaskOrderSpecificationByAsk(ask.Specification, ask.Sku, ask.Combination)
 	if err != nil {
 		ctx.Errorf(api.ErrWrongParams, "illegal specification. %s", err)
@@ -187,6 +189,16 @@ func (m *OrgTaskAddByOrganizationIDImpl) Handler(ctx *http.Context) {
 	if err != nil {
 		ctx.Errorf(api.ErrServer, "get add task last insert id failed. %s", err)
 		return
+	}
+
+	//团购任务是否部分群组可见
+	if task.TeamVisibleState == cidl.GroupBuyingTeamVisibleStatePart {
+		task.TeamIds = ask.TeamIds
+		_, err = dbGroupBuying.AddTaskVisibleTeam(uint32(taskId), task.TeamIds)
+		if err != nil {
+			ctx.Errorf(api.ErrDBInsertFailed, "add task visible team failed. %s", err)
+			return
+		}
 	}
 
 	// 添加库存
@@ -907,8 +919,16 @@ func (m *OrgSendAddByOrganizationIDImpl) Handler(ctx *http.Context) {
 	userId := ctx.Session.Uid
 	send := cidl.NewGroupBuyingSend()
 	organizationId := m.Params.OrganizationID
+
+	var taskIds []uint32
+	var mTaskIdLineIds = make(map[uint32][]uint32)
+	for _, taskLine := range m.Ask.TaskLineIds {
+		taskIds = append(taskIds,taskLine.TaskId)
+		mTaskIdLineIds[taskLine.TaskId] = taskLine.LineIds
+	}
+
 	dbGroupBuying := db.NewMallGroupBuyingOrder()
-	tasks, err := dbGroupBuying.GetFinishBuyingTasks(organizationId, m.Ask.TaskIds)
+	tasks, err := dbGroupBuying.GetFinishBuyingTasks(organizationId, taskIds)
 	if err != nil {
 		ctx.Errorf(api.ErrDbQueryFailed, "get finish ordering tasks failed. %s", err)
 		return
@@ -931,7 +951,7 @@ func (m *OrgSendAddByOrganizationIDImpl) Handler(ctx *http.Context) {
 					WHERE tsk_id IN (?)
 		)
 	`
-	strSql, args, err := conn.In(strSql, m.Ask.TaskIds)
+	strSql, args, err := conn.In(strSql, taskIds)
 	if err != nil {
 		ctx.Errorf(api.ErrServer, "transform in array sql failed. %s", err)
 		return
@@ -961,6 +981,10 @@ func (m *OrgSendAddByOrganizationIDImpl) Handler(ctx *http.Context) {
 	for _, task := range tasks {
 		briefItem := cidl.NewGroupBuyingSendTaskBriefItem()
 		briefItem.TaskId = task.TaskId
+		if _,ok := mTaskIdLineIds[task.TaskId]; !ok {
+			continue
+		}
+		briefItem.LineIds = mTaskIdLineIds[task.TaskId]
 		briefItem.Title = task.Title
 		briefItem.StartTime = task.StartTime
 		briefItem.EndTime = task.EndTime
@@ -1011,3 +1035,44 @@ func (m *OrgSendAddByOrganizationIDImpl) Handler(ctx *http.Context) {
 	m.Ack.SendId = send.SendId
 	ctx.Json(m.Ack)
 }
+
+// 获取任务绑定路线
+type OrgTaskLineListByOrganizationIDByTaskIDImpl struct {
+	cidl.ApiOrgTaskLineListByOrganizationIDByTaskID
+}
+
+func AddOrgTaskLineListByOrganizationIDByTaskIDHandler() {
+	AddHandler(
+		cidl.META_ORG_TASK_LINE_LIST_BY_ORGANIZATION_ID_BY_TASK_ID,
+		func() http.ApiHandler {
+			return &OrgTaskLineListByOrganizationIDByTaskIDImpl{
+				ApiOrgTaskLineListByOrganizationIDByTaskID: cidl.MakeApiOrgTaskLineListByOrganizationIDByTaskID(),
+			}
+		},
+	)
+}
+
+func (m *OrgTaskLineListByOrganizationIDByTaskIDImpl) Handler(ctx *http.Context) {
+	var (
+		err error
+	)
+	//organizationId := m.Params.OrganizationID
+	taskId := m.Params.TaskID
+
+	dbGroupBuying := db.NewMallGroupBuyingOrder()
+	lines, err := dbGroupBuying.GetTaskLineList(taskId)
+	if err != nil {
+		ctx.Errorf(api.ErrDbQueryFailed, "query task line list failed. %s", err)
+		return
+	}
+	
+	if len(lines) == 0 {
+		ctx.Errorf(api.ErrDBQueryNoRecords, "no task lines.")
+		return
+	}
+
+	m.Ack.List = lines
+
+	ctx.Json(m.Ack)
+}
+
