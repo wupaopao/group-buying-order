@@ -81,7 +81,7 @@ func (m *SendExcel) sendCommunitySheetTemplateName() string {
 }
 
 func (m *SendExcel) groupSummarySheetTemplateName() string {
-	return "团长销售额简报"
+	return "模板-团长销售额简报"
 }
 
 func (m *SendExcel) AddTaskSummarySheets(sheetName string, tasks []*cidl.GroupBuyingOrderTask, groupMap map[uint32]*community.Group, sendCommunityMap map[uint32]*cidl.GroupBuyingSendCommunity) (err error) {

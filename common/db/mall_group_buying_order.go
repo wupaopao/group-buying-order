@@ -71,8 +71,6 @@ func (m *MallGroupBuyingOrder) AddTask(task *cidl.GroupBuyingOrderTask) (result 
 		VALUES
 			(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?,?)
 	`
-	//for test
-	fmt.Println(strSql)
 	result, err = m.DB.Exec(strSql,
 		task.OrganizationId,
 		task.Title,
@@ -123,7 +121,6 @@ func (m *MallGroupBuyingOrder) AddTaskVisibleTeam(taskId uint32, teamIds []uint3
 	strValues := strings.Join(sliceStrValue, ",")
 	strSql = fmt.Sprintf(strSql, strValues)
 
-	fmt.Println(strSql)
 	result, err = m.DB.Exec(strSql, args...)
 
 	return
@@ -4353,10 +4350,10 @@ func (m *MallGroupBuyingOrder) GetTaskLineList(taskId uint32) (lines []*cidl.Gro
 
 	for i, line := range lines {
 		if _,ok := m_line[line.LineId]; ok{
-			lines[i].IsSelected = false
+			lines[i].IsSelected = true 
 			lines[i].UpdateTime = m_line[line.LineId]		
 		} else {
-			lines[i].IsSelected = true
+			lines[i].IsSelected = false
 		} 
 	}
 
@@ -4387,7 +4384,6 @@ func (m *MallGroupBuyingOrder) UpdateTaskSelectedLines(taskId uint32, lineIds []
 
 	strValues := strings.Join(sliceStrValue, ",")
 	strSql = fmt.Sprintf(strSql, strValues)
-	fmt.Println(strSql)
 	result, err = m.DB.Exec(strSql, args...)
 	return
 }

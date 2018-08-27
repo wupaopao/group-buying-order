@@ -158,6 +158,7 @@ func (m *TopicGroupBuyingServiceHandler) AddIndent(msg *AddIndentMessage) (err e
 
 			// 获取团购任务购买
 			list, errList := dbGroupBuying.CommunityBuyListOrderTaskIdSkuId(taskBrief.TaskId, i, 100)
+
 			if errList != nil {
 				err = errList
 				log.Warnf("get community buy list failed. %s", err)
@@ -422,6 +423,7 @@ func (m *TopicGroupBuyingServiceHandler) AddSend(msg *AddSendMessage) (err error
 		}
 
 		list, errList := dbGroupBuying.CommunityBuyListByTaskIdLineIdsOrderSkuId(taskBrief.TaskId, taskBrief.LineIds)
+
 		if errList != nil {
 			err = errList
 			log.Warnf("get community buy list by task ids failed. %s", err)
@@ -664,9 +666,9 @@ func (m *TopicGroupBuyingServiceHandler) AddSend(msg *AddSendMessage) (err error
 
 	sendExcel.Date = send.CreateTime
 	sendExcel.OrganizationName = send.OrganizationName
-	sendExcel.TicketNumber = fmt.Sprintf("%s%s%s",
+	sendExcel.TicketNumber = fmt.Sprintf("%s%s",
 		sendExcel.Date.Format("20060102150405"),
-		send.SendId[:4],)
+		send.SendId[:4])
 
 	sendLineMap := make(map[uint32]*cidl.GroupBuyingSendLine)
 
@@ -808,6 +810,7 @@ func (m *TopicGroupBuyingServiceHandler) AddSend(msg *AddSendMessage) (err error
 		fmt.Sprintf("bilimall/byo/send/%d/%d/", send.OrganizationId, today.Unix()),
 		fmt.Sprintf("送货单_%s_%s.xlsx", sendExcel.TicketNumber, send.SendId),
 	)
+
 	if err != nil {
 		log.Warnf("save send excel file failed. %s", err)
 		return

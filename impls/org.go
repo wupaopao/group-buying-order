@@ -100,7 +100,6 @@ func (m *OrgTaskMonthListByYearByMonthImpl) Handler(ctx *http.Context) {
 		return
 	}
 
-	fmt.Println(ack.Count)
 	if ack.Count == 0 {
 		ctx.Json(ack)
 		return
@@ -291,6 +290,7 @@ func (m *OrgSendInvoicesBySendIDImpl) Handler(ctx *http.Context) {
 	}
 
 	uri = qiniu.PrivateAccessUrl(uri, 3600)
+	fmt.Println(uri)
 
 	ctx.Redirect(uri)
 }

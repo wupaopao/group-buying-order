@@ -36,6 +36,7 @@ func init() {
 
 	AddOrgIndentAddByOrganizationIDHandler()
 	AddOrgTaskConfirmDeliverByOrganizationIDByTaskIDHandler()
+	AddOrgTaskLineListByOrganizationIDByTaskIDHandler()
 
 }
 
