@@ -101,16 +101,20 @@ func NewGroupBuyingOrderTaskContent() *GroupBuyingOrderTaskContent {
 // 团长下单模式团购任务
 type GroupBuyingOrderTask struct {
 	GroupBuyingOrderTaskContent
-	ShowState  GroupBuyingTaskShowState  `db:"show_state"`
-	GroupState GroupBuyingTaskGroupState `db:"group_state"`
-	OrderState GroupBuyingTaskOrderState `db:"order_state"`
-	Sales      uint32                    `db:"sales"`
-	IsDelete   bool                      `db:"is_delete"`
-	CreateTime time.Time                 `db:"create_time"`
+	ShowState          GroupBuyingTaskShowState  `db:"show_state"`
+	GroupState         GroupBuyingTaskGroupState `db:"group_state"`
+	OrderState         GroupBuyingTaskOrderState `db:"order_state"`
+	Sales              uint32                    `db:"sales"`
+	IsDelete           bool                      `db:"is_delete"`
+	CreateTime         time.Time                 `db:"create_time"`
+	LineList           []*GroupBuyingTaskLine    `db:"LineList"`
+	IsSelectedAllLines bool                      `db:"IsSelectedAllLines"`
 }
 
 func NewGroupBuyingOrderTask() *GroupBuyingOrderTask {
-	return &GroupBuyingOrderTask{}
+	return &GroupBuyingOrderTask{
+		LineList: make([]*GroupBuyingTaskLine, 0),
+	}
 }
 
 // 团长下单模式库存
@@ -190,6 +194,8 @@ type GroupBuyingOrderCommunityOrder struct {
 	Version               uint32                     `db:"version"`
 	CreateTime            time.Time                  `db:"create_time"`
 	AllowCancel           bool                       `db:"allow_cancel"`
+	Status                string                     `db:"Status"`
+	IsCancel              bool                       `db:"is_cancel"`
 }
 
 func NewGroupBuyingOrderCommunityOrder() *GroupBuyingOrderCommunityOrder {

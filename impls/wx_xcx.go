@@ -32,6 +32,7 @@ func init() {
 	AddWxXcxBuyTaskListByGroupIDHandler()
 	AddWxXcxTaskStatusByTaskIDHandler()
 	AddWxXcxTaskInventoryByTaskIDHandler()
+	AddWxXcxOrderOrderCancelByGroupIDByOrderIDHandler()
 }
 
 // 今日团购
@@ -56,7 +57,7 @@ func (m *WxXcxTaskTodayListByOrganizationIDImpl) Handler(ctx *http.Context) {
 	)
 	ack := m.Ack
 	organizationId := m.Params.OrganizationID
-	/*groupId := m.Params.GroupID
+	groupId := m.Params.GroupID
 	
 
 	
@@ -65,8 +66,7 @@ func (m *WxXcxTaskTodayListByOrganizationIDImpl) Handler(ctx *http.Context) {
 		ctx.ProxyErrorf(err, "get community group team from proxy failed. %s", err)
 		return
 	}
-	teamIds = team.TeamIDs */
-	teamIds := []uint32{1}
+	teamIds := team.TeamIDs 
 	dbGroupBuying := db.NewMallGroupBuyingOrder()
 	ack.Count, err = dbGroupBuying.TaskTodayCount(organizationId, teamIds)
 	if err != nil {
@@ -151,13 +151,23 @@ func (m *WxXcxTaskFutureListByOrganizationIDImpl) Handler(ctx *http.Context) {
 	ack := m.Ack
 	organizationId := m.Params.OrganizationID
 	dbGroupBuying := db.NewMallGroupBuyingOrder()
-	ack.Count, err = dbGroupBuying.TaskFutureCount(organizationId)
+	groupId := m.Params.GroupID
+	
+	team, err := community.NewProxy("community-service").InnerCommunityGroupTeamByGroupID(groupId)
+	if err != nil {
+		ctx.ProxyErrorf(err, "get community group team from proxy failed. %s", err)
+		return
+	}
+	teamIds := team.TeamIDs 
+
+
+	ack.Count, err = dbGroupBuying.TaskFutureCount(organizationId,teamIds)
 	if err != nil {
 		ctx.Errorf(api.ErrDbQueryFailed, "get today task count failed. %s", err)
 		return
 	}
 
-	list, err := dbGroupBuying.TaskFutureList(organizationId, m.Query.Page, m.Query.PageSize, false)
+	list, err := dbGroupBuying.TaskFutureList(organizationId, teamIds, m.Query.Page, m.Query.PageSize, false)
 	if err != nil {
 		ctx.Errorf(api.ErrDbQueryFailed, "get today task list failed. %s", err)
 		return
@@ -208,13 +218,22 @@ func (m *WxXcxTaskHistoryListByOrganizationIDImpl) Handler(ctx *http.Context) {
 	ack := m.Ack
 	organizationId := m.Params.OrganizationID
 	dbGroupBuying := db.NewMallGroupBuyingOrder()
-	ack.Count, err = dbGroupBuying.TaskHistoryCount(organizationId)
+	groupId := m.Params.GroupID
+
+	team, err := community.NewProxy("community-service").InnerCommunityGroupTeamByGroupID(groupId)
+	if err != nil {
+		ctx.ProxyErrorf(err, "get community group team from proxy failed. %s", err)
+		return
+	}
+	teamIds := team.TeamIDs 
+
+	ack.Count, err = dbGroupBuying.TaskHistoryCount(organizationId,teamIds)
 	if err != nil {
 		ctx.Errorf(api.ErrDbQueryFailed, "get today task count failed. %s", err)
 		return
 	}
 
-	list, err := dbGroupBuying.TaskHistoryList(organizationId, m.Query.Page, m.Query.PageSize, false)
+	list, err := dbGroupBuying.TaskHistoryList(organizationId, teamIds, m.Query.Page, m.Query.PageSize, false)
 	if err != nil {
 		ctx.Errorf(api.ErrDbQueryFailed, "get today task list failed. %s", err)
 		return
@@ -1176,7 +1195,7 @@ func (m *WxXcxOrderOrderListByGroupIDImpl) Handler(ctx *http.Context) {
 		ctx.Json(m.Ack)
 		return
 	}
-	mCancelIdList, err := dbGroupBuyingOrder.CommunityAllowCancelOrderList(groupId)
+	mNotAllowCancelList, err := dbGroupBuyingOrder.CommunityNotAllowCancelOrderList(groupId)
 	if err != nil {
 		ctx.Errorf(api.ErrDbQueryFailed, "get allow cancel order failed. %s", err)
 		return
@@ -1190,10 +1209,14 @@ func (m *WxXcxOrderOrderListByGroupIDImpl) Handler(ctx *http.Context) {
 
 	for _, communityOrder := range list {
 		orderId := communityOrder.OrderId
-		if _,ok := mCancelIdList[orderId];ok{
-			communityOrder.AllowCancel = true
-		}else {
+		if status,ok := mNotAllowCancelList[orderId];ok{
 			communityOrder.AllowCancel = false
+			communityOrder.Status = status
+		}else {
+			communityOrder.AllowCancel = true 
+		}
+		if communityOrder.IsCancel {
+			communityOrder.Status = "订单已取消"
 		}
 		for _, communityBuy := range *communityOrder.GoodsDetail {
 			buyDetail := communityBuy.BuyDetail
@@ -1330,4 +1353,149 @@ func (m *WxXcxTaskInventoryByTaskIDImpl) Handler(ctx *http.Context) {
 	}
 
 	ctx.Json(m.Ack)
+}
+
+// 取消订单 
+type WxXcxOrderOrderCancelByGroupIDByOrderIDImpl struct {
+	cidl.ApiWxXcxOrderOrderCancelByGroupIDByOrderID
+}
+
+func AddWxXcxOrderOrderCancelByGroupIDByOrderIDHandler() {
+	AddHandler(
+		cidl.META_WX_XCX_ORDER_ORDER_CANCEL_BY_GROUP_ID_BY_ORDER_ID,
+		func() http.ApiHandler {
+			return &WxXcxOrderOrderCancelByGroupIDByOrderIDImpl{
+				ApiWxXcxOrderOrderCancelByGroupIDByOrderID: cidl.MakeApiWxXcxOrderOrderCancelByGroupIDByOrderID(),
+			}
+		},
+	)
+}
+
+func (m *WxXcxOrderOrderCancelByGroupIDByOrderIDImpl) Handler(ctx *http.Context) {
+	var (
+		err error
+	)
+	groupId := m.Params.GroupID
+	orderId := m.Params.OrderID
+	dbGroupBuyingOrder := db.NewMallGroupBuyingOrder()
+	
+	//订单是否支持取消
+	/*
+	isAllowCancel, _ := dbGroupBuyingOrder.IsOrderAllowCancel(groupId,orderId)	
+	if !isAllowCancel {
+		ctx.Errorf(cidl.ErrOrderNotAllowCancel, "order is not allow cancel.")
+		return
+	}*/
+
+	communityOrder, err := dbGroupBuyingOrder.CommunityOrderInfo(orderId)
+	
+	//for test
+	fmt.Println(communityOrder.GoodsDetail.ToString())
+
+	goodsDetail := *communityOrder.GoodsDetail
+	for _, communityBuy := range goodsDetail{
+		taskId := communityBuy.TaskId
+		groupId := communityBuy.GroupId
+		buyDetail := communityBuy.BuyDetail
+		count := communityBuy.Count
+		skuId := communityBuy.SkuId
+
+		//开始事务
+		tx, err := dbGroupBuyingOrder.DB.Begin()
+		if err != nil {
+			log.Warnf("begin transaction failed. %s", err)
+			continue
+		}
+		if !buyDetail.IsCombination {
+			//singleGoods := buyDetail.SingleGoods
+			success, errAdd := dbGroupBuyingOrder.TxAddtractInventorySurplus(tx, taskId, skuId, count)
+                        if errAdd != nil || !success {
+                                log.Warnf("addtract inventory failed. %s", errAdd)
+                                err = tx.Rollback()
+                                if err != nil {
+                                        log.Warnf("rollback community buy failed. %s", err)
+                                }
+                                continue
+                        }
+		} else {
+			combinationGoods := buyDetail.CombinationGoods
+			subItems := combinationGoods.SubItems
+			var skuIds []string
+			for skuId,_ := range subItems {
+				skuIds = append(skuIds,skuId)	
+			}
+			// 锁定库存
+                        _, err = dbGroupBuyingOrder.TxLockInventorySurplus(tx, taskId, skuIds)
+                        if err != nil {
+                                log.Warnf("lock inventory surplus failed. %s", err)
+                                err = tx.Rollback()
+                                if err != nil {
+                                        log.Warnf("rollback community buy failed. %s", err)
+                                }
+                                continue
+                        }	
+
+                        // 事务加库存
+                        buySuccess := true
+                        for _, subItem := range subItems {
+                                success, errAdd := dbGroupBuyingOrder.TxAddtractInventorySurplus(tx, taskId, subItem.SkuId, subItem.Count*count)
+                                if errAdd != nil || success == false {
+                                        log.Warnf("addtract inventory failed. %s", err)
+                                        buySuccess = false
+                                        break
+                                }
+                        }
+
+                        if !buySuccess {
+                                err = tx.Rollback()
+                                if err != nil {
+                                        log.Warnf("rollback community buy failed. %s", err)
+                                }
+                                continue
+                        }	
+               }
+
+               _, err = dbGroupBuyingOrder.TxDeleteCommunityBuy(tx, orderId, groupId, taskId)
+                if err != nil {
+                        log.Warnf("tx add community buy failed. %s", err)
+                        err = tx.Rollback()
+                        if err != nil {
+                                log.Warnf("rollback community buy failed. %s", err)
+                        }
+                        continue
+                }
+
+                // 提交事务
+                err = tx.Commit()
+                if err != nil {
+                        log.Warnf("commit community buy failed. %s", err)
+                        continue
+                }
+
+
+                // 减少社群购买团购任务的订单统计
+		goodsCount := communityBuy.Count
+		totalMarketPrice := communityBuy.TotalMarketPrice
+		totalGroupBuyingPrice := communityBuy.TotalGroupBuyingPrice
+		totalSettlementPrice := communityBuy.TotalSettlementPrice
+		totalCostPrice := communityBuy.TotalCostPrice
+
+                _, err = dbGroupBuyingOrder.DecrCommunityBuyTaskValues(taskId,groupId,1,goodsCount,totalMarketPrice,totalGroupBuyingPrice,totalSettlementPrice,totalCostPrice)
+                if err != nil {
+                        log.Warnf("decrease community buy task values failed. %s", err)
+                }
+
+                // 减少任务的购买数量
+                _, err = dbGroupBuyingOrder.DecrTaskSales(taskId, goodsCount)
+                if err != nil {
+                        log.Warnf("decrease task sales failed. %s", err)
+                }
+	}
+	_, err = dbGroupBuyingOrder.DeleteCommunityOrder(groupId, orderId)
+	if err != nil {
+		ctx.Errorf(api.ErrDBInsertFailed, "delete community order failed. %s", err)
+		return
+	}
+	
+	ctx.Succeed()
 }

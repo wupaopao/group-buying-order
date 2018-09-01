@@ -224,6 +224,9 @@ POST "/group_buying_order/org/task/edit/:organization_id/:task_id" {
 		
 		# 是否上架
 		ShowState            GroupBuyingTaskShowState       
+
+		# 是否允许取消
+		AllowCancel 	     GroupBuyingTaskAllowCancelState 
 		
 		# 第二步
 		# 商品名称

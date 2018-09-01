@@ -201,21 +201,22 @@ func MakeApiOrgTaskAddByOrganizationID() ApiOrgTaskAddByOrganizationID {
 }
 
 type AskOrgTaskEditByOrganizationIDByTaskID struct {
-	ShowStartTime        time.Time                     `binding:"required" db:"ShowStartTime"`
-	StartTime            time.Time                     `db:"StartTime"`
-	EndTime              time.Time                     `binding:"required" db:"EndTime"`
-	SellType             GroupBuyingOrderTaskSellType  `binding:"required" db:"SellType"`
-	Notes                string                        `binding:"required,lte=1000" db:"Notes"`
-	ShowState            GroupBuyingTaskShowState      `db:"ShowState"`
-	Title                string                        `binding:"required,lte=64" db:"Title"`
-	Introduction         string                        `binding:"required,lte=255" db:"Introduction"`
-	CoverPicture         string                        `binding:"required,lte=255" db:"CoverPicture"`
-	IllustrationPictures *TaskIllustrationPicturesType `binding:"required" db:"IllustrationPictures"`
-	Info                 *TaskInfoType                 `binding:"required" db:"Info"`
-	Specification        []*AskTaskSpecificationItem   `binding:"required,gt=0,dive,required" db:"Specification"`
-	Sku                  []*AskTaskSkuItem             `binding:"required,gt=0,dive,required" db:"Sku"`
-	Combination          []*AskTaskCombinationItem     `binding:"required,dive,required" db:"Combination"`
-	WxSellText           string                        `binding:"required" db:"WxSellText"`
+	ShowStartTime        time.Time                       `binding:"required" db:"ShowStartTime"`
+	StartTime            time.Time                       `db:"StartTime"`
+	EndTime              time.Time                       `binding:"required" db:"EndTime"`
+	SellType             GroupBuyingOrderTaskSellType    `binding:"required" db:"SellType"`
+	Notes                string                          `binding:"required,lte=1000" db:"Notes"`
+	ShowState            GroupBuyingTaskShowState        `db:"ShowState"`
+	AllowCancel          GroupBuyingTaskAllowCancelState `db:"AllowCancel"`
+	Title                string                          `binding:"required,lte=64" db:"Title"`
+	Introduction         string                          `binding:"required,lte=255" db:"Introduction"`
+	CoverPicture         string                          `binding:"required,lte=255" db:"CoverPicture"`
+	IllustrationPictures *TaskIllustrationPicturesType   `binding:"required" db:"IllustrationPictures"`
+	Info                 *TaskInfoType                   `binding:"required" db:"Info"`
+	Specification        []*AskTaskSpecificationItem     `binding:"required,gt=0,dive,required" db:"Specification"`
+	Sku                  []*AskTaskSkuItem               `binding:"required,gt=0,dive,required" db:"Sku"`
+	Combination          []*AskTaskCombinationItem       `binding:"required,dive,required" db:"Combination"`
+	WxSellText           string                          `binding:"required" db:"WxSellText"`
 }
 
 func NewAskOrgTaskEditByOrganizationIDByTaskID() *AskOrgTaskEditByOrganizationIDByTaskID {

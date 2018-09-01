@@ -289,6 +289,17 @@ func (m *MallGroupBuyingOrder) IncrTaskSales(taskId uint32, incrSales uint32) (r
 	return
 }
 
+func (m *MallGroupBuyingOrder) DecrTaskSales(taskId uint32, decrSales uint32) (result sql.Result, err error) {
+	strSql := `
+		UPDATE byo_task
+		SET
+			sales=sales-?
+		WHERE tsk_id=?
+	`
+	result, err = m.DB.Exec(strSql, decrSales, taskId)
+	return
+}
+
 func (m *MallGroupBuyingOrder) GetTask(taskId uint32) (task *cidl.GroupBuyingOrderTask, err error) {
 	defer func() {
 		if err != nil {
@@ -324,7 +335,9 @@ func (m *MallGroupBuyingOrder) GetTask(taskId uint32) (task *cidl.GroupBuyingOrd
 			sales,
 			is_delete,
 			version,
-			create_time
+			create_time,
+			allow_cancel,
+			team_visible
 		FROM byo_task
 		WHERE tsk_id=?
 	`
@@ -356,6 +369,8 @@ func (m *MallGroupBuyingOrder) GetTask(taskId uint32) (task *cidl.GroupBuyingOrd
 		&task.IsDelete,
 		&task.Version,
 		&task.CreateTime,
+		&task.AllowCancel,
+		&task.TeamVisibleState,
 	)
 	if err != nil {
 		if err != conn.ErrNoRows {
@@ -635,7 +650,8 @@ func (m *MallGroupBuyingOrder) TaskNotReachEndTimeList(organizationId uint32, pa
 			sales,
 			is_delete,
 			version,
-			create_time
+			create_time,
+			allow_cancel
 		FROM byo_task
 		WHERE
 			org_id=?
@@ -680,6 +696,7 @@ func (m *MallGroupBuyingOrder) TaskNotReachEndTimeList(organizationId uint32, pa
 			&task.IsDelete,
 			&task.Version,
 			&task.CreateTime,
+			&task.AllowCancel,
 		)
 
 		if err != nil {
@@ -761,7 +778,8 @@ func (m *MallGroupBuyingOrder) TaskMonthList(organizationId uint32, year uint32,
 			sales,
 			is_delete,
 			version,
-			create_time
+			create_time,
+			allow_cancel
 		FROM byo_task
 		WHERE
 			org_id=?
@@ -807,6 +825,7 @@ func (m *MallGroupBuyingOrder) TaskMonthList(organizationId uint32, year uint32,
 			&task.IsDelete,
 			&task.Version,
 			&task.CreateTime,
+			&task.AllowCancel,
 		)
 
 		if err != nil {
@@ -879,7 +898,8 @@ func (m *MallGroupBuyingOrder) TaskFinishBuyingList(organizationId uint32, page 
 			sales,
 			is_delete,
 			version,
-			create_time
+			create_time,
+			allow_cancel
 		FROM byo_task
 		WHERE org_id=? AND group_state=?
 		ORDER BY tsk_id %s
@@ -921,6 +941,7 @@ func (m *MallGroupBuyingOrder) TaskFinishBuyingList(organizationId uint32, page 
 			&task.IsDelete,
 			&task.Version,
 			&task.CreateTime,
+			&task.AllowCancel,
 		)
 
 		if err != nil {
@@ -994,7 +1015,8 @@ func (m *MallGroupBuyingOrder) TaskFinishBuyingSearchList(organizationId uint32,
 			sales,
 			is_delete,
 			version,
-			create_time
+			create_time,
+			allow_cancel
 		FROM byo_task
 		WHERE org_id=? AND group_state=? AND title LIKE ?
 		ORDER BY tsk_id %s
@@ -1037,6 +1059,7 @@ func (m *MallGroupBuyingOrder) TaskFinishBuyingSearchList(organizationId uint32,
 			&task.IsDelete,
 			&task.Version,
 			&task.CreateTime,
+			&task.AllowCancel,
 		)
 
 		if err != nil {
@@ -1119,7 +1142,8 @@ func (m *MallGroupBuyingOrder) TaskSoldFinishBuyingList(organizationId uint32, p
 			sales,
 			is_delete,
 			version,
-			create_time
+			create_time,
+			allow_cancel
 		FROM byo_task
 		WHERE
 			org_id=?
@@ -1164,6 +1188,7 @@ func (m *MallGroupBuyingOrder) TaskSoldFinishBuyingList(organizationId uint32, p
 			&task.IsDelete,
 			&task.Version,
 			&task.CreateTime,
+			&task.AllowCancel,
 		)
 
 		if err != nil {
@@ -1246,7 +1271,8 @@ func (m *MallGroupBuyingOrder) TaskSoldFinishBuyingSearchList(organizationId uin
 			sales,
 			is_delete,
 			version,
-			create_time
+			create_time,
+			allow_cancel
 		FROM byo_task
 		WHERE
 			org_id=?
@@ -1293,6 +1319,7 @@ func (m *MallGroupBuyingOrder) TaskSoldFinishBuyingSearchList(organizationId uin
 			&task.IsDelete,
 			&task.Version,
 			&task.CreateTime,
+			&task.AllowCancel,
 		)
 
 		if err != nil {
@@ -1493,23 +1520,38 @@ func (m *MallGroupBuyingOrder) TaskTodayList(organizationId uint32, teamIds []ui
 }
 
 // 未来团购
-func (m *MallGroupBuyingOrder) TaskFutureCount(organizationId uint32) (count uint32, err error) {
+func (m *MallGroupBuyingOrder) TaskFutureCount(organizationId uint32, teamIds []uint32) (count uint32, err error) {
 	strSql := `
 		SELECT
 			COUNT(*)
 		FROM
-			byo_task
+			byo_task a
+		LEFT JOIN
+			byo_task_team b
+		ON
+			a.tsk_id=b.tsk_id
 		WHERE
-			org_id=?
-			AND show_state=?
-			AND (TO_DAYS(show_start_time)-TO_DAYS(now())>0)
-			AND is_delete=0
+			a.org_id=?
+			AND a.show_state=?
+			AND (TO_DAYS(a.show_start_time)-TO_DAYS(now())>0)
+			AND a.is_delete=0
+			AND (
+				a.team_visible=1 
+				OR
+				b.team_id in (?) 
+			)
 	`
-	err = m.DB.Get(&count, strSql, organizationId, cidl.GroupBuyingTaskShowStateShow)
+	var sliceStrValues []string
+	for _, teamId := range teamIds {
+		sliceStrValues = append(sliceStrValues,strconv.FormatUint(uint64(teamId), 10))
+	}
+	strValues := strings.Join(sliceStrValues, ",")
+
+	err = m.DB.Get(&count, strSql, organizationId, cidl.GroupBuyingTaskShowStateShow, strValues)
 	return
 }
 
-func (m *MallGroupBuyingOrder) TaskFutureList(organizationId uint32, page uint32, pageSize uint32, idAsc bool) (tasks []*cidl.GroupBuyingOrderTask, err error) {
+func (m *MallGroupBuyingOrder) TaskFutureList(organizationId uint32, teamIds []uint32, page uint32, pageSize uint32, idAsc bool) (tasks []*cidl.GroupBuyingOrderTask, err error) {
 	if page <= 0 || pageSize <= 0 {
 		err = errors.New("page or pageSize should be greater than 0")
 		return
@@ -1522,38 +1564,53 @@ func (m *MallGroupBuyingOrder) TaskFutureList(organizationId uint32, page uint32
 	}
 	strSql := `
 		SELECT
-			tsk_id,
-			org_id,
-			title,
-			introduction,
-			cover_picture,
-			illustration_pictures,
-			info,
-			specification,
-			wx_sell_text,
-			notes,
-			show_start_time,
-			start_time,
-			end_time,
-			sell_type,
-			show_state,
-			group_state,
-			order_state,
-			sales,
-			is_delete,
-			version,
-			create_time
-		FROM byo_task
+			a.tsk_id,
+			a.org_id,
+			a.title,
+			a.introduction,
+			a.cover_picture,
+			a.illustration_pictures,
+			a.info,
+			a.specification,
+			a.wx_sell_text,
+			a.notes,
+			a.show_start_time,
+			a.start_time,
+			a.end_time,
+			a.sell_type,
+			a.show_state,
+			a.group_state,
+			a.order_state,
+			a.sales,
+			a.is_delete,
+			a.version,
+			a.create_time
+		FROM 
+			byo_task a
+		LEFT JOIN
+			byo_task_team b
+		ON
+			a.tsk_id=b.tsk_id
 		WHERE
-			org_id=?
-			AND show_state=?
-			AND (TO_DAYS(show_start_time)-TO_DAYS(now())>0)
-			AND is_delete=0
-		ORDER BY tsk_id %s
+			a.org_id=?
+			AND a.show_state=?
+			AND (TO_DAYS(a.show_start_time)-TO_DAYS(now())>0)
+			AND a.is_delete=0
+			AND (
+				a.team_visible=1 
+				OR
+				b.team_id in (?) 
+			)
+		ORDER BY a.tsk_id %s
 		LIMIT ? OFFSET ?
 	`
 	strSql = fmt.Sprintf(strSql, strOrderBy)
-	rows, err := m.DB.Query(strSql, organizationId, cidl.GroupBuyingTaskShowStateShow, pageSize, offset)
+	var sliceStrValues []string
+	for _, teamId := range teamIds {
+		sliceStrValues = append(sliceStrValues,strconv.FormatUint(uint64(teamId), 10))
+	}
+	strValues := strings.Join(sliceStrValues, ",")
+	rows, err := m.DB.Query(strSql, organizationId, cidl.GroupBuyingTaskShowStateShow, strValues, pageSize, offset)
 	if err != nil {
 		log.Warnf("query task list failed. %s", err)
 		return
@@ -1622,28 +1679,43 @@ func (m *MallGroupBuyingOrder) TaskFutureList(organizationId uint32, page uint32
 }
 
 // 历史团购
-func (m *MallGroupBuyingOrder) TaskHistoryCount(organizationId uint32) (count uint32, err error) {
+func (m *MallGroupBuyingOrder) TaskHistoryCount(organizationId uint32, teamIds []uint32) (count uint32, err error) {
 	strSql := `
 		SELECT
 			COUNT(*)
 		FROM
-			byo_task
+			byo_task a
+		LEFT JOIN
+			byo_task_team b
+		ON
+			a.tsk_id=b.tsk_id
 		WHERE
-			org_id=?
-			AND show_state=?
-			AND group_state=?
-			AND is_delete=0
+			a.org_id=?
+			AND a.show_state=?
+			AND a.group_state=?
+			AND a.is_delete=0
+			AND (
+				a.team_visible=1 
+				OR
+				b.team_id in (?) 
+			)
 	`
+	var sliceStrValues []string
+	for _, teamId := range teamIds {
+		sliceStrValues = append(sliceStrValues,strconv.FormatUint(uint64(teamId), 10))
+	}
+	strValues := strings.Join(sliceStrValues, ",")
 	err = m.DB.Get(&count,
 		strSql,
 		organizationId,
 		cidl.GroupBuyingTaskShowStateShow,
-		cidl.GroupBuyingTaskGroupStateFinishBuying)
+		cidl.GroupBuyingTaskGroupStateFinishBuying,
+		strValues)
 
 	return
 }
 
-func (m *MallGroupBuyingOrder) TaskHistoryList(organizationId uint32, page uint32, pageSize uint32, idAsc bool) (tasks []*cidl.GroupBuyingOrderTask, err error) {
+func (m *MallGroupBuyingOrder) TaskHistoryList(organizationId uint32,teamIds []uint32, page uint32, pageSize uint32, idAsc bool) (tasks []*cidl.GroupBuyingOrderTask, err error) {
 	if page <= 0 || pageSize <= 0 {
 		err = errors.New("page or pageSize should be greater than 0")
 		return
@@ -1656,41 +1728,58 @@ func (m *MallGroupBuyingOrder) TaskHistoryList(organizationId uint32, page uint3
 	}
 	strSql := `
 		SELECT
-			tsk_id,
-			org_id,
-			title,
-			introduction,
-			cover_picture,
-			illustration_pictures,
-			info,
-			specification,
-			wx_sell_text,
-			notes,
-			show_start_time,
-			start_time,
-			end_time,
-			sell_type,
-			show_state,
-			group_state,
-			order_state,
-			sales,
-			is_delete,
-			version,
-			create_time
-		FROM byo_task
+			a.tsk_id,
+			a.org_id,
+			a.title,
+			a.introduction,
+			a.cover_picture,
+			a.illustration_pictures,
+			a.info,
+			a.specification,
+			a.wx_sell_text,
+			a.notes,
+			a.show_start_time,
+			a.start_time,
+			a.end_time,
+			a.sell_type,
+			a.show_state,
+			a.group_state,
+			a.order_state,
+			a.sales,
+			a.is_delete,
+			a.version,
+			a.create_time
+		FROM 
+			byo_task a
+		LEFT JOIN
+			byo_task_team b
+		ON
+			a.tsk_id=b.tsk_id
 		WHERE
-			org_id=?
-			AND show_state=?
-			AND group_state=?
-			AND is_delete=0
-		ORDER BY tsk_id %s
+			a.org_id=?
+			AND a.show_state=?
+			AND a.group_state=?
+			AND a.is_delete=0
+			AND (
+				a.team_visible=1 
+				OR
+				b.team_id in (?) 
+			)
+		ORDER BY a.tsk_id %s
 		LIMIT ? OFFSET ?
 	`
 	strSql = fmt.Sprintf(strSql, strOrderBy)
+
+	var sliceStrValues []string
+	for _, teamId := range teamIds {
+		sliceStrValues = append(sliceStrValues,strconv.FormatUint(uint64(teamId), 10))
+	}
+	strValues := strings.Join(sliceStrValues, ",")
 	rows, err := m.DB.Query(strSql,
 		organizationId,
 		cidl.GroupBuyingTaskShowStateShow,
 		cidl.GroupBuyingTaskGroupStateFinishBuying,
+		strValues,
 		pageSize,
 		offset)
 	if err != nil {
@@ -2463,6 +2552,41 @@ func (m *MallGroupBuyingOrder) IncrCommunityBuyTaskValues(
 		incrTotalGroupBuyingPrice,
 		incrTotalSettlementPrice,
 		incrTotalCostPrice,
+		taskId,
+		groupId,
+	)
+	return
+}
+
+func (m *MallGroupBuyingOrder) DecrCommunityBuyTaskValues(
+	taskId uint32,
+	groupId uint32,
+	decrOrderCount uint32,
+	decrGoodsCount uint32,
+	decrTotalMarketPrice float64,
+	decrTotalGroupBuyingPrice float64,
+	decrTotalSettlementPrice float64,
+	decrTotalCostPrice float64,
+) (result sql.Result, err error) {
+	strSql := `
+		UPDATE byo_community_buy_task
+		SET
+			order_count=order_count-?,
+			goods_count=goods_count-?,
+			total_market_price=total_market_price-?,
+			total_group_buying_price=total_group_buying_price-?,
+			total_settlement_price=total_settlement_price-?,
+			total_cost_price=total_cost_price-?
+		WHERE tsk_id=? AND grp_id=?
+	`
+	result, err = m.DB.Exec(
+		strSql,
+		decrOrderCount,
+		decrGoodsCount,
+		decrTotalMarketPrice,
+		decrTotalGroupBuyingPrice,
+		decrTotalSettlementPrice,
+		decrTotalCostPrice,
 		taskId,
 		groupId,
 	)
@@ -3717,6 +3841,16 @@ func (m *MallGroupBuyingOrder) TxLockInventorySurplus(tx *conn.Tx, taskId uint32
 	return
 }
 
+// 事务锁库存(taskIds and skuIds)
+func (m *MallGroupBuyingOrder) TxLockInventorySurplusByTaskIdsSkuIds(tx *conn.Tx, taskId uint32, skuIds []string) (result sql.Result, err error) {
+	strSql := `
+		SELECT surplus FROM byo_inventory WHERE tsk_id=? AND sku_id IN (?) FOR UPDATE
+	`
+	strSql, args, err := conn.In(strSql, taskId, skuIds)
+	result, err = tx.Exec(strSql, args...)
+	return
+}
+
 // 减库存
 func (m *MallGroupBuyingOrder) SubtractInventorySurplus(taskId uint32, skuId string, count uint32) (success bool, err error) {
 	strSql := `
@@ -3781,6 +3915,41 @@ func (m *MallGroupBuyingOrder) TxSubtractInventorySurplus(tx *conn.Tx, taskId ui
 
 	return
 }
+
+// 增加库存
+func (m *MallGroupBuyingOrder) TxAddtractInventorySurplus(tx *conn.Tx, taskId uint32, skuId string, count uint32) (success bool, err error) {
+	strSql := `
+		UPDATE byo_inventory
+		SET
+			sales=sales-?,
+			surplus=surplus+?
+		WHERE
+			tsk_id=?
+			AND sku_id=?
+			AND surplus <= total
+	`
+	result, err := tx.Exec(strSql, count, count, taskId, skuId)
+	if err != nil {
+		log.Warnf("update byo_inventory failed. %s", err)
+		return
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		log.Warnf("get rows affected failed. %s", err)
+		return
+	}
+
+	if rowsAffected == 0 {
+		log.Warnf("no rows affected. %s", err)
+		return
+	}
+
+	success = true
+
+	return
+}
+
 
 // 添加购物车
 func (m *MallGroupBuyingOrder) AddCommunityCart(cart *cidl.GroupBuyingOrderCommunityCart) (result sql.Result, err error) {
@@ -4180,7 +4349,8 @@ func (m *MallGroupBuyingOrder) CommunityOrderList(groupId uint32, page uint32, p
 			total_settlement_price,
 			total_cost_price,
 			version,
-			create_time
+			create_time,
+			is_cancel
 		FROM
 			byo_community_order
 		WHERE
@@ -4210,6 +4380,7 @@ func (m *MallGroupBuyingOrder) CommunityOrderList(groupId uint32, page uint32, p
 			&communityOrder.TotalCostPrice,
 			&communityOrder.Version,
 			&communityOrder.CreateTime,
+			&communityOrder.IsCancel,
 		)
 		if err != nil {
 			if err != conn.ErrNoRows {
@@ -4230,10 +4401,14 @@ func (m *MallGroupBuyingOrder) CommunityOrderList(groupId uint32, page uint32, p
 	return
 }
 
-func (m *MallGroupBuyingOrder) CommunityAllowCancelOrderList(groupId uint32) (mOrderIds map[string]bool, err error) {
+// 不允许取消订单列表
+func (m *MallGroupBuyingOrder) CommunityNotAllowCancelOrderList(groupId uint32) (mOrderIds map[string]string, err error) {
 	strSql := `
 		SELECT
-			a.order_id
+			a.order_id,
+			b.allow_cancel,
+			b.group_state,
+			b.show_state
 		FROM
 			byo_community_buy a
 		LEFT JOIN
@@ -4242,29 +4417,44 @@ func (m *MallGroupBuyingOrder) CommunityAllowCancelOrderList(groupId uint32) (mO
 			a.tsk_id = b.tsk_id
 		WHERE
 			a.grp_id = ?
-		AND
-			b.allow_cancel = 1
-		AND
-			b.end_time >  now()
-		AND	
+		AND  (
 			b.show_state != ? 
+			OR
+			b.group_state != ?
+			OR
+			b.allow_cancel = ?
+		)
 	`
-	rows, err := m.DB.Query(strSql, groupId, cidl.GroupBuyingTaskShowStateHidden)
+	rows, err := m.DB.Query(strSql, groupId, cidl.GroupBuyingTaskShowStateShow, cidl.GroupBuyingTaskGroupStateInProgress,cidl.GroupBuyingTaskNotAllowCancel)
 	if err != nil {
-		log.Warnf("query line list failed. %s", err)
+		log.Warnf("query order state failed. %s", err)
 		return
 	}
 
-	mOrderIds = make(map[string]bool)
+	mOrderIds = make(map[string]string)
 	
 	for rows.Next() {
-		var orderId string 
-		err = rows.Scan(&orderId)
+		var (
+			orderId  string
+			allowCancel bool
+			showState cidl.GroupBuyingTaskShowState
+			groupState cidl.GroupBuyingTaskGroupState
+		)
+		err = rows.Scan(&orderId,&allowCancel,&groupState,&showState)
 		if err != nil {
 			log.Warnf("query allow cancel order failed. %s", err)
 			return
 		}
-	 	mOrderIds[orderId] = false;	
+
+		var status string
+		if !allowCancel {
+			status = "不支持取消订单"
+		} else if groupState != cidl.GroupBuyingTaskGroupStateInProgress {
+			status = "订单已截团"
+		} else if showState != cidl.GroupBuyingTaskShowStateShow {
+			status = "已下架"
+		}
+	 	mOrderIds[orderId] = status;	
 	}
 	return 
 
@@ -4350,10 +4540,10 @@ func (m *MallGroupBuyingOrder) GetTaskLineList(taskId uint32) (lines []*cidl.Gro
 
 	for i, line := range lines {
 		if _,ok := m_line[line.LineId]; ok{
-			lines[i].IsSelected = true 
+			lines[i].IsSelected = false  //曾经被选中过，则下次默认不选中 
 			lines[i].UpdateTime = m_line[line.LineId]		
 		} else {
-			lines[i].IsSelected = false
+			lines[i].IsSelected = true
 		} 
 	}
 
@@ -4385,6 +4575,196 @@ func (m *MallGroupBuyingOrder) UpdateTaskSelectedLines(taskId uint32, lineIds []
 	strValues := strings.Join(sliceStrValue, ",")
 	strSql = fmt.Sprintf(strSql, strValues)
 	result, err = m.DB.Exec(strSql, args...)
+	return
+}
+
+
+func (m *MallGroupBuyingOrder) CommunityOrderTaskCount (groupId uint32, orderId string) (mTaskCount map[uint32]map[string]uint32, err error) {
+
+	strSql := `
+		SELECT tsk_id,sku_id,count
+		FROM byo_community_buy 
+		WHERE groupId = ? and orderId = ?
+		`
+	rows, err := m.DB.Query(strSql, groupId, orderId)
+	if err != nil {
+		log.Warnf("query byo_community_buy failed. %s", err)
+		return
+	}
+
+	mTaskCount = make(map[uint32]map[string]uint32)
+	for rows.Next() {
+		var (
+			tsk_id,count uint32
+			sku_id string
+		)
+		err = rows.Scan(&tsk_id,&sku_id, &count)
+		if err != nil {
+			log.Warnf("scan taskid count failed. %s", err)
+			return
+		}
+		if _, ok := mTaskCount[tsk_id]; !ok {
+			mSkuCount := make(map[string]uint32)
+			mSkuCount[sku_id] = count
+			mTaskCount[tsk_id] = mSkuCount
+			continue
+		}
+		mSkuCount := mTaskCount[tsk_id]
+		mSkuCount[sku_id] = count
+		mTaskCount[tsk_id] = mSkuCount 
+	}
+	return
+}
+
+func (m *MallGroupBuyingOrder) IsOrderAllowCancel(groupId uint32, orderId string) (isAllowCancel bool, err error) {
+
+	strSql := `
+		SELECT 1 
+		FROM byo_community_buy a, byo_task b
+		WHERE a.order_id = ?
+		AND a.grp_id = ?
+		AND a.tsk_id = b.tsk_id
+		AND b.show_state = ?
+		AND b.group_state = ?
+		AND b.allow_cancel = ?
+		`
+	queryRow, err := m.DB.QueryRow(strSql, groupId, orderId, cidl.GroupBuyingTaskShowStateShow, cidl.GroupBuyingTaskGroupStateInProgress,cidl.GroupBuyingTaskAllowCancel)
+	if err != nil {
+		log.Warnf("query is order allow cancel failed. %s", err)
+		return
+	}
+	
+	var tmp uint32
+	err = queryRow.Scan(
+		&tmp,
+	)
+
+	isAllowCancel = false
+	if err != nil {
+		//for test
+		log.Warnf("IsOrderAllowCancel failed")
+		if err == conn.ErrNoRows {
+			return false, nil
+			log.Warnf("err no rows")
+		}
+		return
+	}
+	isAllowCancel = true
+	return
+}
+
+
+// 取消社群购买商品
+func (m *MallGroupBuyingOrder) TxDeleteCommunityBuy(tx *conn.Tx, orderId string, groupId uint32, taskId uint32) (result sql.Result, err error) {
+
+	strSql := `
+		DELETE FROM byo_community_buy
+		WHERE order_id = ? AND grp_id = ? AND tsk_id = ?		
+	`
+	result, err = m.DB.Exec(strSql, orderId, groupId, taskId)
+	return
+}
+
+
+func (m *MallGroupBuyingOrder) DeleteCommunityOrder(groupId uint32, orderId string) (result sql.Result, err error) {
+	strSql := `
+		UPDATE byo_community_order
+		SET is_cancel = 1
+		WHERE ord_id = ? 
+	`
+	result, err = m.DB.Exec(strSql, orderId)
+	return
+}
+
+// 订单详情
+func (m *MallGroupBuyingOrder) CommunityOrderInfo(orderId string) (communityOrder *cidl.GroupBuyingOrderCommunityOrder, err error) {
+
+	strSql := `
+		SELECT
+			ord_id,
+			grp_id,
+			grp_ord_id,
+			goods_detail,
+			count,
+			total_market_price,
+			total_group_buying_price,
+			total_settlement_price,
+			total_cost_price,
+			version,
+			create_time,
+			is_cancel
+		FROM
+			byo_community_order
+		WHERE
+			ord_id=?
+	`
+	row, err := m.DB.QueryRow(strSql, orderId)
+	if err != nil {
+		log.Warnf("query community order list failed. %s", err)
+		return
+	}
+
+	communityOrder = cidl.NewGroupBuyingOrderCommunityOrder()
+	var goodsDetail string
+	err = row.Scan(
+		&communityOrder.OrderId,
+		&communityOrder.GroupId,
+		&communityOrder.GroupOrderId,
+		&goodsDetail,
+		&communityOrder.Count,
+		&communityOrder.TotalMarketPrice,
+		&communityOrder.TotalGroupBuyingPrice,
+		&communityOrder.TotalSettlementPrice,
+		&communityOrder.TotalCostPrice,
+		&communityOrder.Version,
+		&communityOrder.CreateTime,
+		&communityOrder.IsCancel,
+	)
+	if err != nil {
+		if err != conn.ErrNoRows {
+			log.Warnf("query community order failed. %s", err)
+		}
+		return
+	}
+
+	err = communityOrder.GoodsDetail.FromString(goodsDetail)
+	if err != nil {
+		log.Warnf("init goods detail from string failed. %s", err)
+		return
+	}
+
+	return
+}
+
+func (m *MallGroupBuyingOrder) GetTaskVisibleTeamIDs(taskId uint32) (teamIds []uint32, err error) {
+	defer func() {
+		if err != nil {
+			teamIds = nil
+		}
+	}()
+
+	strSql := `
+		SELECT
+			team_id
+		FROM byo_task_team
+		WHERE tsk_id=?
+	`
+	rows, err := m.DB.Query(strSql, taskId)
+	if err != nil {
+		log.Warnf("query task teamId failed. %s", err)
+		return
+	}
+
+	for rows.Next() {
+		var teamId uint32
+		err = rows.Scan(&teamId)
+		if err != nil {
+			log.Warnf("scan task teamId failed. %s", err)
+			return
+		}
+
+		teamIds = append(teamIds,teamId)
+	}
 	return
 }
 

@@ -442,3 +442,17 @@ GET "/group_buying_order/wx_xcx/task/inventory/:task_id" {
 }
 
 
+# 取消订单
+POST "/group_buying_order/wx_xcx/order/cancel/:group_id/:order_id" {
+	
+	Name "WxXcxOrderOrderCancelByGroupIDByOrderID"
+	Type "json"
+	Params {
+		
+		# 社群ID
+		GroupID uint32 [ form:"group_id" binding:"required,gt=0" ]
+		
+		# 订单ID
+		OrderID	 string [ form:"order_id" binding:"required,gt=0" ]
+	}
+}

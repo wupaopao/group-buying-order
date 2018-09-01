@@ -14,6 +14,7 @@ const (
 	ErrTaskGoodsUnavailableForSale               autoErrorserrorsTcidl = 9006 //商品不允许被购买
 	ErrTaskAddOrderFailed                        autoErrorserrorsTcidl = 9007 //订单添加失败
 	ErrSendCommunityNotBindLine                  autoErrorserrorsTcidl = 9010 //存在社群未绑定配送路线
+	ErrOrderNotAllowCancel                       autoErrorserrorsTcidl = 9011 //该订单不支持取消
 )
 
 func (m autoErrorserrorsTcidl) Number() int { return int(m) }
@@ -38,6 +39,8 @@ func (m autoErrorserrorsTcidl) Message() string {
 		return "订单添加失败"
 	case ErrSendCommunityNotBindLine:
 		return "存在社群未绑定配送路线"
+	case ErrOrderNotAllowCancel:
+		return "该订单不支持取消"
 	default:
 		return "UNKNOWN_MESSAGE_autoErrorserrorsTcidl"
 	}
@@ -63,6 +66,8 @@ func (m autoErrorserrorsTcidl) Name() string {
 		return "ErrTaskAddOrderFailed"
 	case ErrSendCommunityNotBindLine:
 		return "ErrSendCommunityNotBindLine"
+	case ErrOrderNotAllowCancel:
+		return "ErrOrderNotAllowCancel"
 	default:
 		return "UNKNOWN_Name_autoErrorserrorsTcidl"
 	}

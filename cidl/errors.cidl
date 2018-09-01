@@ -8,5 +8,6 @@ errors {
 	ErrTaskGoodsUnavailableForSale               9006 "商品不允许被购买"                          
 	ErrTaskAddOrderFailed                        9007 "订单添加失败"                                
 	ErrSendCommunityNotBindLine                  9010 "存在社群未绑定配送路线"                 
+	ErrOrderNotAllowCancel			     9011 "该订单不支持取消"                 
 }
 

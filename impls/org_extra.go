@@ -310,6 +310,7 @@ func (m *OrgTaskEditByOrganizationIDByTaskIDImpl) Handler(ctx *http.Context) {
 	task.ShowState = ask.ShowState
 	task.SellType = ask.SellType
 	task.Version = cidl.GroupBuyingTaskRecordVersion
+	task.AllowCancel = ask.AllowCancel
 	task.Specification, err = cidl.NewGroupBuyingTaskOrderSpecificationByAsk(ask.Specification, ask.Sku, ask.Combination)
 	if err != nil {
 		ctx.Errorf(api.ErrWrongParams, "illegal specification. %s", err)
@@ -391,6 +392,14 @@ func (m *OrgTaskInfoByTaskIDImpl) Handler(ctx *http.Context) {
 	if err != nil {
 		ctx.Errorf(api.ErrDbQueryFailed, "get task failed. %s", err)
 		return
+	}
+
+	if m.Ack.TeamVisibleState == cidl.GroupBuyingTeamVisibleStatePart {
+		m.Ack.TeamIds, err = dbGroupBuying.GetTaskVisibleTeamIDs(m.Params.TaskID)
+		if err != nil {
+			ctx.Errorf(api.ErrDbQueryFailed, "get task teamIds failed. %s", err)
+			return
+		}
 	}
 
 	ctx.Json(m.Ack)
@@ -710,11 +719,28 @@ func (m *OrgTaskSoldListByOrganizationIDImpl) Handler(ctx *http.Context) {
 	} else {
 		ack.List, err = dbGroupBuying.TaskSoldFinishBuyingSearchList(organizationId, search, m.Query.Page, m.Query.PageSize, false)
 	}
-
 	if err != nil {
 		ctx.Errorf(api.ErrDbQueryFailed, "get task list failed. %s", err)
 		return
 	}
+
+	for i,one := range ack.List {
+	        lines, err := dbGroupBuying.GetTaskLineList(one.TaskId)
+        	if err != nil {
+                	ctx.Errorf(api.ErrDbQueryFailed, "query task line list failed. %s", err)
+                	return
+		}
+		isSelectedAllLines := true
+		for _,line := range lines {
+			if !line.IsSelected {
+				isSelectedAllLines = false
+				break
+			}
+		}
+		ack.List[i].LineList = lines
+		ack.List[i].IsSelectedAllLines = isSelectedAllLines
+	}
+
 
 	ctx.Json(ack)
 }

@@ -782,3 +782,34 @@ func MakeApiWxXcxTaskInventoryByTaskID() ApiWxXcxTaskInventoryByTaskID {
 		Ack: NewAckWxXcxTaskInventoryByTaskID(),
 	}
 }
+
+type MetaApiWxXcxOrderOrderCancelByGroupIDByOrderID struct {
+}
+
+var META_WX_XCX_ORDER_ORDER_CANCEL_BY_GROUP_ID_BY_ORDER_ID = &MetaApiWxXcxOrderOrderCancelByGroupIDByOrderID{}
+
+func (m *MetaApiWxXcxOrderOrderCancelByGroupIDByOrderID) GetMethod() string { return "POST" }
+func (m *MetaApiWxXcxOrderOrderCancelByGroupIDByOrderID) GetURL() string {
+	return "/group_buying_order/wx_xcx/order/cancel/:group_id/:order_id"
+}
+func (m *MetaApiWxXcxOrderOrderCancelByGroupIDByOrderID) GetName() string {
+	return "WxXcxOrderOrderCancelByGroupIDByOrderID"
+}
+func (m *MetaApiWxXcxOrderOrderCancelByGroupIDByOrderID) GetType() string { return "json" }
+
+// 取消订单
+type ApiWxXcxOrderOrderCancelByGroupIDByOrderID struct {
+	MetaApiWxXcxOrderOrderCancelByGroupIDByOrderID
+	Params struct {
+		GroupID uint32 `form:"group_id" binding:"required,gt=0" db:"GroupID"`
+		OrderID string `form:"order_id" binding:"required,gt=0" db:"OrderID"`
+	}
+}
+
+func (m *ApiWxXcxOrderOrderCancelByGroupIDByOrderID) GetQuery() interface{}  { return nil }
+func (m *ApiWxXcxOrderOrderCancelByGroupIDByOrderID) GetParams() interface{} { return &m.Params }
+func (m *ApiWxXcxOrderOrderCancelByGroupIDByOrderID) GetAsk() interface{}    { return nil }
+func (m *ApiWxXcxOrderOrderCancelByGroupIDByOrderID) GetAck() interface{}    { return nil }
+func MakeApiWxXcxOrderOrderCancelByGroupIDByOrderID() ApiWxXcxOrderOrderCancelByGroupIDByOrderID {
+	return ApiWxXcxOrderOrderCancelByGroupIDByOrderID{}
+}

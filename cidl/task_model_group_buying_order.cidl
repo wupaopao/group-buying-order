@@ -144,6 +144,11 @@ struct GroupBuyingOrderTask {
 	
 	# 创建时间
 	CreateTime datetime                  [ db:"create_time" ]
+	# 配送路线
+	LineList   array<GroupBuyingTaskLine> 
+	
+	# 是否选择全部路线
+	IsSelectedAllLines  bool
 }
 
 
@@ -305,6 +310,13 @@ struct GroupBuyingOrderCommunityOrder {
 	
 	# 允许取消
 	AllowCancel	      bool			[ db:"allow_cancel"		] 
+	
+	# 订单状态
+	Status		string
+
+	# 是否已取消
+	IsCancel		bool			[ db:"is_cancel" ]
+	
 }
 
 
@@ -364,4 +376,5 @@ struct CommunityBuyDetailType {
 	# 组合
 	CombinationGoods GroupBuyingOrderTaskCombinationItem
 }
+
 
