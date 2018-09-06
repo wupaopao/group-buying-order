@@ -311,6 +311,7 @@ func (m *OrgTaskEditByOrganizationIDByTaskIDImpl) Handler(ctx *http.Context) {
 	task.SellType = ask.SellType
 	task.Version = cidl.GroupBuyingTaskRecordVersion
 	task.AllowCancel = ask.AllowCancel
+	task.TeamVisibleState = ask.TeamVisibleState
 	task.Specification, err = cidl.NewGroupBuyingTaskOrderSpecificationByAsk(ask.Specification, ask.Sku, ask.Combination)
 	if err != nil {
 		ctx.Errorf(api.ErrWrongParams, "illegal specification. %s", err)
@@ -333,6 +334,15 @@ func (m *OrgTaskEditByOrganizationIDByTaskIDImpl) Handler(ctx *http.Context) {
 		if err != nil {
 			ctx.Errorf(api.ErrDBUpdateFailed, "update task failed. %s", err)
 			return
+		}
+		//团购任务是否部分群组可见
+		if task.TeamVisibleState == cidl.GroupBuyingTeamVisibleStatePart {
+			task.TeamIds = ask.TeamIds
+			_, err = dbGroupBuying.UpdateTaskVisibleTeam(uint32(taskId), task.TeamIds)
+			if err != nil {
+				ctx.Errorf(api.ErrDBInsertFailed, "add task visible team failed. %s", err)
+				return
+			}
 		}
 
 		// 删除原来库存

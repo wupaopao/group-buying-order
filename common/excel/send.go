@@ -155,6 +155,7 @@ func (m *SendExcel) BeforeSave() {
 	xlsx.DeleteSheet(m.sendLineSummarySheetTemplateName())
 	xlsx.DeleteSheet(m.sendLineSheetTemplateName())
 	xlsx.DeleteSheet(m.sendCommunitySheetTemplateName())
+	xlsx.DeleteSheet(m.groupSummarySheetTemplateName())
 }
 
 /**
@@ -291,7 +292,7 @@ func (m *GroupSummarySheets) newSheet() (sheet string, err error) {
 	return
 }
 
-func (m *GroupSummarySheets) AddLineRow(groupName string, groupManagerName string, groupManagerMobile string, settlementAmount float64) (err error) {
+func (m *GroupSummarySheets) AddLineRow(sendNumber string,groupName string, groupManagerName string, groupManagerMobile string, settlementAmount float64) (err error) {
 	if m.activeSheet == "" {
 		_, err = m.newSheet()
 		if err != nil {
@@ -306,11 +307,13 @@ func (m *GroupSummarySheets) AddLineRow(groupName string, groupManagerName strin
 	sheet := m.activeSheet
 	rowIndex := m.activeLineRowsCount + 2
 
-	xlsx.SetCellValue(sheet, fmt.Sprintf("A%d", rowIndex), m.SendExcel.TicketNumber)
+	xlsx.SetCellValue(sheet, fmt.Sprintf("A%d", rowIndex), sendNumber)
 	xlsx.SetCellValue(sheet, fmt.Sprintf("B%d", rowIndex), groupName)
 	xlsx.SetCellValue(sheet, fmt.Sprintf("C%d", rowIndex), groupManagerName)
 	xlsx.SetCellValue(sheet, fmt.Sprintf("D%d", rowIndex), groupManagerMobile)
 	xlsx.SetCellValue(sheet, fmt.Sprintf("E%d", rowIndex), settlementAmount)
+	//for test
+	fmt.Println("send excel date",m.SendExcel.Date)
 	xlsx.SetCellValue(sheet, fmt.Sprintf("F%d", rowIndex), m.SendExcel.Date)
 
 	m.activeLineRowsCount++
@@ -358,13 +361,13 @@ func (m *SendLineSummarySheets) newSheet() (sheet string, err error) {
 	// 画基本的文字
 	xlsx.SetCellValue(sheet, "G2", fmt.Sprintf("NO:%s", m.SendExcel.TicketNumber))
 	xlsx.SetCellValue(sheet, "A3", m.SendExcel.Date)
-	xlsx.SetCellValue(sheet, "B23", m.SendExcel.OrganizationName)
+	xlsx.SetCellValue(sheet, "B19", m.SendExcel.OrganizationName)
 
 	return
 }
 
 func (m *SendLineSummarySheets) AddLineRow(lineName string, communityCount uint32, totalSettlement float64) (err error) {
-	if m.activeLineRowsCount >= 16 || m.activeSheet == "" {
+	if m.activeLineRowsCount >= 12 || m.activeSheet == "" {
 		_, err = m.newSheet()
 		if err != nil {
 			log.Warnf("new sheet failed. %s", err)
@@ -387,7 +390,7 @@ func (m *SendLineSummarySheets) AddLineRow(lineName string, communityCount uint3
 	m.activeLineRowsCount++
 
 	xlsx.SetCellValue(sheet, "A4", fmt.Sprintf("包含%d条配送路线", m.activeLineRowsCount))
-	xlsx.SetCellValue(sheet, "F22", fmt.Sprintf("小写金额:￥%.2f", m.activeTotalAmount))
+	xlsx.SetCellValue(sheet, "F18", fmt.Sprintf("小写金额:￥%.2f", m.activeTotalAmount))
 
 	return
 }
@@ -433,8 +436,8 @@ func (m *SendLineSheets) newSheet() (sheet string, err error) {
 	xlsx.SetCellValue(sheet, "G2", fmt.Sprintf("NO:%s", m.SendExcel.TicketNumber))
 	xlsx.SetCellValue(sheet, "A3", m.SendExcel.Date)
 	xlsx.SetCellValue(sheet, "A4", fmt.Sprintf("覆盖%d个配送点", m.SendLine.CommunityCount))
-	xlsx.SetCellValue(sheet, "F24", fmt.Sprintf("小写金额:￥%.2f", m.SendLine.SettlementAmount))
-	xlsx.SetCellValue(sheet, "B25", m.SendExcel.OrganizationName)
+	xlsx.SetCellValue(sheet, "F18", fmt.Sprintf("小写金额:￥%.2f", m.SendLine.SettlementAmount))
+	xlsx.SetCellValue(sheet, "B19", m.SendExcel.OrganizationName)
 
 	return
 }
@@ -452,7 +455,7 @@ func (m *SendLineSheets) InitSheets() (err error) {
 
 		for _, skuId := range skuIds {
 			skuBuy := taskBuy.Sku[skuId]
-			if m.activeLineRowsCount >= 18 || m.activeSheet == "" {
+			if m.activeLineRowsCount >= 12 || m.activeSheet == "" {
 				_, err = m.newSheet()
 				if err != nil {
 					log.Warnf("new send line sheet failed. %s", err)
@@ -546,13 +549,13 @@ func (m *SendCommunitySheets) newSheet() (sheet string, err error) {
 	xlsx.SetCellValue(sheet, "A1", sendCommunity.OrganizationName)
 	xlsx.SetCellValue(sheet, "F2", fmt.Sprintf("NO:%s", m.SendExcel.TicketNumber))
 	xlsx.SetCellValue(sheet, "A2", fmt.Sprintf("地址:%s", sendCommunity.OrganizationAddress))
-	xlsx.SetCellValue(sheet, "A4", fmt.Sprintf("社群名称:%s", sendCommunity.GroupName))
-	xlsx.SetCellValue(sheet, "D4", fmt.Sprintf("客户电话:%s", sendCommunity.GroupManagerMobile))
-	xlsx.SetCellValue(sheet, "F4", fmt.Sprintf("制单人员:%s", sendCommunity.AuthorName))
-	xlsx.SetCellValue(sheet, "A5", fmt.Sprintf("客户地址:%s", sendCommunity.GroupAddress))
-	xlsx.SetCellValue(sheet, "D5", fmt.Sprintf("联系人:%s", sendCommunity.GroupManagerName))
-	xlsx.SetCellValue(sheet, "F5", fmt.Sprintf("送货日期:%s", m.SendExcel.Date.Format("2006-01-02")))
-	xlsx.SetCellValue(sheet, "E24", fmt.Sprintf("小写金额:￥%.2f", m.SendCommunity.SettlementAmount))
+	xlsx.SetCellValue(sheet, "A3", fmt.Sprintf("社群名称:%s", sendCommunity.GroupName))
+	xlsx.SetCellValue(sheet, "D3", fmt.Sprintf("客户电话:%s", sendCommunity.GroupManagerMobile))
+	xlsx.SetCellValue(sheet, "F3", fmt.Sprintf("制单人员:%s", sendCommunity.AuthorName))
+	xlsx.SetCellValue(sheet, "A4", fmt.Sprintf("客户地址:%s", sendCommunity.GroupAddress))
+	xlsx.SetCellValue(sheet, "D4", fmt.Sprintf("联系人:%s", sendCommunity.GroupManagerName))
+	xlsx.SetCellValue(sheet, "F4", fmt.Sprintf("送货日期:%s", m.SendExcel.Date.Format("2006-01-02")))
+	xlsx.SetCellValue(sheet, "E16", fmt.Sprintf("小写金额:￥%.2f", m.SendCommunity.SettlementAmount))
 
 	return
 }
@@ -570,7 +573,7 @@ func (m *SendCommunitySheets) InitSheets() (err error) {
 
 		for _, skuId := range skuIds {
 			skuBuy := taskBuy.Sku[skuId]
-			if m.activeLineRowsCount >= 17 || m.activeSheet == "" {
+			if m.activeLineRowsCount >= 10 || m.activeSheet == "" {
 				_, err = m.newSheet()
 				if err != nil {
 					log.Warnf("new sheet failed. %s", err)
@@ -581,7 +584,7 @@ func (m *SendCommunitySheets) InitSheets() (err error) {
 			}
 
 			sheet := m.activeSheet
-			rowIndex := m.activeLineRowsCount + 7
+			rowIndex := m.activeLineRowsCount + 6 
 
 			xlsx.SetCellValue(sheet, fmt.Sprintf("B%d", rowIndex), taskBuy.TaskTitle)
 

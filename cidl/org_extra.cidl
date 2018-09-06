@@ -228,6 +228,12 @@ POST "/group_buying_order/org/task/edit/:organization_id/:task_id" {
 		# 是否允许取消
 		AllowCancel 	     GroupBuyingTaskAllowCancelState 
 		
+		# 是否部分社团群组可见
+		TeamVisibleState     GroupBuyingTeamVisibleState
+
+		# 可见群组ID
+		TeamIds              array<uint32>
+		
 		# 第二步
 		# 商品名称
 		Title                string                          [ binding:"required,lte=64"             ]

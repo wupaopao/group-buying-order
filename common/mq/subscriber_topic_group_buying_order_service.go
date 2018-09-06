@@ -601,6 +601,8 @@ func (m *TopicGroupBuyingServiceHandler) AddSend(msg *AddSendMessage) (err error
 	// 各个社群配送情况
 	// 社群ID -> 购买情况
 	sendCommunityMap := make(map[uint32]*cidl.GroupBuyingSendCommunity)
+	// 社群ID -> 送货单号
+	sendNumberMap := make(map[uint32]string)
 
 	// 社群map
 	groupMap := make(map[uint32]*community.Group)
@@ -654,6 +656,7 @@ func (m *TopicGroupBuyingServiceHandler) AddSend(msg *AddSendMessage) (err error
 		}
 
 		sendCommunityMap[groupId] = sendCommunity
+		sendNumberMap[groupId] = fmt.Sprintf("%s%s",send.CreateTime.Format("20060102150405"), utils.UniqueID()[:4]) 
 
 	}
 
@@ -727,11 +730,14 @@ func (m *TopicGroupBuyingServiceHandler) AddSend(msg *AddSendMessage) (err error
 	}
 
 	// 团长销售额简报 
+	//不同的社群生成不同的送货单号
 	groupSummarySheets := sendExcel.GetGroupSummarySheets()
 	for _, groupCountMap := range lineCommunityCountMap {
 		for groupId, _ := range groupCountMap {
+			sendNumber := sendNumberMap[groupId] 
 			sendCommunity := sendCommunityMap[groupId]
 		       	groupSummarySheets.AddLineRow(
+				sendNumber,
 				sendCommunity.GroupName,
 				sendCommunity.GroupManagerName,
 				sendCommunity.GroupManagerMobile,
@@ -784,8 +790,10 @@ func (m *TopicGroupBuyingServiceHandler) AddSend(msg *AddSendMessage) (err error
 
 		// 生成社群
 		var sendCommunities []*cidl.GroupBuyingSendCommunity
+		ticketNumber := sendExcel.TicketNumber
 		for groupId, _ := range groupCountMap {
 			sendCommunity := sendCommunityMap[groupId]
+			sendExcel.TicketNumber = sendNumberMap[groupId] 
 			err = sendExcel.AddSendCommunitySheets(sendCommunity)
 			if err != nil {
 				log.Warnf("add send community sheets failed. %s", err)
@@ -794,6 +802,7 @@ func (m *TopicGroupBuyingServiceHandler) AddSend(msg *AddSendMessage) (err error
 
 			sendCommunities = append(sendCommunities, sendCommunity)
 		}
+		sendExcel.TicketNumber = ticketNumber
 
 	}
 

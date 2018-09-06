@@ -208,6 +208,8 @@ type AskOrgTaskEditByOrganizationIDByTaskID struct {
 	Notes                string                          `binding:"required,lte=1000" db:"Notes"`
 	ShowState            GroupBuyingTaskShowState        `db:"ShowState"`
 	AllowCancel          GroupBuyingTaskAllowCancelState `db:"AllowCancel"`
+	TeamVisibleState     GroupBuyingTeamVisibleState     `db:"TeamVisibleState"`
+	TeamIds              []uint32                        `db:"TeamIds"`
 	Title                string                          `binding:"required,lte=64" db:"Title"`
 	Introduction         string                          `binding:"required,lte=255" db:"Introduction"`
 	CoverPicture         string                          `binding:"required,lte=255" db:"CoverPicture"`
@@ -221,6 +223,7 @@ type AskOrgTaskEditByOrganizationIDByTaskID struct {
 
 func NewAskOrgTaskEditByOrganizationIDByTaskID() *AskOrgTaskEditByOrganizationIDByTaskID {
 	return &AskOrgTaskEditByOrganizationIDByTaskID{
+		TeamIds:              make([]uint32, 0),
 		IllustrationPictures: NewTaskIllustrationPicturesType(),
 		Info:                 NewTaskInfoType(),
 		Specification:        make([]*AskTaskSpecificationItem, 0),

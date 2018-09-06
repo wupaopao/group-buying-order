@@ -126,6 +126,40 @@ func (m *MallGroupBuyingOrder) AddTaskVisibleTeam(taskId uint32, teamIds []uint3
 	return
 }
 
+func (m *MallGroupBuyingOrder) UpdateTaskVisibleTeam(taskId uint32, teamIds []uint32) (result sql.Result, err error) {
+	strSql := `
+		DELETE FROM byo_task_team 
+		where tsk_id = 
+		`
+	result, err = m.DB.Exec(strSql, taskId)
+	if err != nil {
+		return 
+	}
+	strSql = `
+		INSERT INTO byo_task_team
+		(
+		 	tsk_id,
+		 	team_id
+		)
+		VALUES
+			%s	
+		`
+	var args []interface{}
+	var sliceStrValue []string
+	for _, teamId := range teamIds {
+		sliceStrValue = append(sliceStrValue, "(?, ?)")
+		args = append(args, taskId)
+		args = append(args, teamId)
+	}
+
+	strValues := strings.Join(sliceStrValue, ",")
+	strSql = fmt.Sprintf(strSql, strValues)
+
+	result, err = m.DB.Exec(strSql, args...)
+
+	return
+}
+
 func (m *MallGroupBuyingOrder) UpdateNotStartTask(task *cidl.GroupBuyingOrderTask) (result sql.Result, err error) {
 	illustrationPictures, err := task.IllustrationPictures.ToString()
 	if err != nil {
